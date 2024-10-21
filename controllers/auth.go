@@ -3,11 +3,11 @@ package controllers
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"medico/models"
+	"medico/dto"
 )
 
 func SignIn(c *fiber.Ctx) error {
-	signInData := new(models.SignIn)
+	signInData := new(dto.SignIn)
 
 	if err := c.BodyParser(signInData); err != nil {
 
