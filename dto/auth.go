@@ -2,22 +2,8 @@ package dto
 
 import (
 	"errors"
+	"medico/utils"
 	"regexp"
-)
-
-// Patterns
-
-const (
-	lowerCasePattern   = `.*[[:lower:]]+.*[[:lower:]]+.*`
-	upperCasePattern   = `.*[[:upper:]]+.*[[:upper:]]+.*`
-	digitPattern       = `.*[[:digit:]]+.*[[:digit:]]+.*`
-	specialCharPattern = `.*[[:punct:]]+.*[[:punct:]]+.*`
-	numOfCharPattern   = `^[[:graph:]]{12,}$`
-	spacePattern       = `[[:space:]]`
-)
-
-const (
-	emailPattern = "^[a-z0-9!#$%&'*+/=?^_" + "`" + "{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_" + "`" + `{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?`
 )
 
 type CommonUserSignIn struct {
@@ -35,7 +21,7 @@ type DoctorSignIn struct {
 }
 
 func (cusu CommonUserSignUp) Validate() error {
-	emailRegex, numOfCharRegexp := regexp.MustCompile(emailPattern), regexp.MustCompile(numOfCharPattern)
+	emailRegex, numOfCharRegexp := regexp.MustCompile(utils.EmailPattern), regexp.MustCompile(utils.NumOfCharPattern)
 
 	if emailRegex.MatchString(cusu.Email) == false {
 		return errors.New("invalid email")
@@ -51,13 +37,13 @@ func (cusu CommonUserSignUp) Validate() error {
 func (cusi CommonUserSignIn) Validate() error {
 
 	var (
-		emailRegexp       = regexp.MustCompile(emailPattern)
-		lowerCaseRegexp   = regexp.MustCompile(lowerCasePattern)
-		upperCaseRegexp   = regexp.MustCompile(upperCasePattern)
-		digitRegexp       = regexp.MustCompile(digitPattern)
-		specialCharRegexp = regexp.MustCompile(specialCharPattern)
-		numOfCharRegexp   = regexp.MustCompile(numOfCharPattern)
-		spaceRegexp       = regexp.MustCompile(spacePattern)
+		emailRegexp       = regexp.MustCompile(utils.EmailPattern)
+		lowerCaseRegexp   = regexp.MustCompile(utils.LowerCasePattern)
+		upperCaseRegexp   = regexp.MustCompile(utils.UpperCasePattern)
+		digitRegexp       = regexp.MustCompile(utils.DigitPattern)
+		specialCharRegexp = regexp.MustCompile(utils.SpecialCharPattern)
+		numOfCharRegexp   = regexp.MustCompile(utils.NumOfCharPattern)
+		spaceRegexp       = regexp.MustCompile(utils.SpacePattern)
 	)
 
 	var (
