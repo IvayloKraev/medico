@@ -3,6 +3,9 @@ package controllers
 import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
+	"medico/data"
+	"medico/db"
 	"medico/dto"
 )
 
@@ -29,7 +32,17 @@ func SignIn(c *fiber.Ctx) error {
 		})
 	}
 
-	fmt.Println(signInData)
+	cmu := data.CommonUserDB{
+		ID:           uuid.New(),
+		FirstName:    "",
+		SecondName:   "",
+		LastName:     "",
+		Email:        signInData.Email,
+		Password:     signInData.Password,
+		PasswordSalt: "",
+	}
+
+	db.DBConn.Create(&cmu)
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{})
 }
