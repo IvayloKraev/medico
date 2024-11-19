@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"medico/db"
 	"medico/routes"
 )
 
@@ -10,5 +11,6 @@ func main() {
 
 	routes.SetUpRoutes(medicoFiber)
 
+	db.Connect()
 	medicoFiber.Listen("0.0.0.0:3000")
 }
