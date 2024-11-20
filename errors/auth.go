@@ -1,4 +1,4 @@
-package errors
+package medicoErrors
 
 const (
 	invalidEmail    = "INVALID EMAIL"
