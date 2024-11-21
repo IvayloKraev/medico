@@ -3,12 +3,11 @@ package validators
 import (
 	"errors"
 	"medico/errors"
-	"medico/utils"
 	"regexp"
 )
 
 func ValidateEmail(email string) error {
-	var emailRegexp = regexp.MustCompile(utils.EmailPattern)
+	var emailRegexp = regexp.MustCompile(EmailPattern)
 
 	if !emailRegexp.MatchString(email) {
 		return errors.New(medicoErrors.IncorrectEmail)
@@ -17,7 +16,7 @@ func ValidateEmail(email string) error {
 }
 
 func ValidateNumberOfLowerCase(password string) error {
-	var lowerCaseRegexp = regexp.MustCompile(utils.LowerCasePattern)
+	var lowerCaseRegexp = regexp.MustCompile(LowerCasePattern)
 
 	if !lowerCaseRegexp.MatchString(password) {
 		return errors.New(medicoErrors.NotEnoughLowerCase)
@@ -26,7 +25,7 @@ func ValidateNumberOfLowerCase(password string) error {
 }
 
 func ValidateNumberOfUpperCase(password string) error {
-	var upperCaseRegexp = regexp.MustCompile(utils.UpperCasePattern)
+	var upperCaseRegexp = regexp.MustCompile(UpperCasePattern)
 
 	if !upperCaseRegexp.MatchString(password) {
 		return errors.New(medicoErrors.NotEnoughUpperCase)
@@ -35,7 +34,7 @@ func ValidateNumberOfUpperCase(password string) error {
 }
 
 func ValidateNumberOfDigits(password string) error {
-	var digitsRegexp = regexp.MustCompile(utils.DigitPattern)
+	var digitsRegexp = regexp.MustCompile(DigitPattern)
 
 	if !digitsRegexp.MatchString(password) {
 		return errors.New(medicoErrors.NotEnoughDigits)
@@ -44,7 +43,7 @@ func ValidateNumberOfDigits(password string) error {
 }
 
 func ValidateNumberOfSpecialCharacters(password string) error {
-	var specialCharsRegexp = regexp.MustCompile(utils.SpecialCharPattern)
+	var specialCharsRegexp = regexp.MustCompile(SpecialCharPattern)
 
 	if !specialCharsRegexp.MatchString(password) {
 		return errors.New(medicoErrors.NotEnoughSpecialChars)
@@ -53,7 +52,7 @@ func ValidateNumberOfSpecialCharacters(password string) error {
 }
 
 func ValidateTotalNumberOfCharacters(password string) error {
-	var numberOfCharsRegexp = regexp.MustCompile(utils.NumOfCharPattern)
+	var numberOfCharsRegexp = regexp.MustCompile(NumOfCharPattern)
 
 	if !numberOfCharsRegexp.MatchString(password) {
 		return errors.New(medicoErrors.NotEnoughNumberOfChars)
@@ -61,8 +60,8 @@ func ValidateTotalNumberOfCharacters(password string) error {
 	return nil
 }
 
-func validateNotIncludedWhiteSpaces(password string) error {
-	var spaceRegexp = regexp.MustCompile(utils.SpacePattern)
+func ValidateNotIncludedWhiteSpaces(password string) error {
+	var spaceRegexp = regexp.MustCompile(SpacePattern)
 
 	if !spaceRegexp.MatchString(password) {
 		return errors.New(medicoErrors.IncludedWhiteSpace)
