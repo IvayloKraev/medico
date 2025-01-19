@@ -1,20 +1,18 @@
 package models
 
-import "github.com/google/uuid"
-
 type Hospital struct {
-	ID      uuid.UUID `gorm:"primaryKey;unique;type:uuid;not null"`
-	Name    string
-	Address string
+	ID      TModelID `gorm:"primaryKey;unique;type:uuid;not null"`
+	Name    TShortText
+	Address TShortText
 	Doctors []Doctor `gorm:"foreignKey:HospitalID"`
 }
 
 type Doctor struct {
-	ID         uuid.UUID `gorm:"primaryKey;unique;type:uuid;not null"`
-	FirstName  string
-	SecondName string
-	Surname    string
-	HospitalID uuid.UUID `gorm:"type:uuid;not null"`
-	Hospital   Hospital  `gorm:"foreignKey:HospitalID"`
-	Uin        int
+	ID         TModelID `gorm:"primaryKey;unique;type:uuid;not null"`
+	FirstName  TShortText
+	SecondName TShortText
+	Surname    TShortText
+	HospitalID TModelID `gorm:"type:uuid;not null"`
+	Hospital   Hospital `gorm:"foreignKey:HospitalID"`
+	Uin        TShortText
 }
