@@ -3,8 +3,8 @@ package dto
 import (
 	"errors"
 	"fmt"
+	"medico/dto/validators"
 	"medico/errors"
-	"medico/validators"
 )
 
 type IValidate interface {
