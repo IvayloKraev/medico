@@ -18,5 +18,5 @@ func main() {
 
 	routes.SetUpRoutes(medicoFiber)
 
-	_ = medicoFiber.Listen("0.0.0.0:3000")
+	_ = medicoFiber.Listen(":8080")
 }

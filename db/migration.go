@@ -3,9 +3,7 @@ package db
 import "medico/models"
 
 func Migrate(repository Repository) {
-	if err := repository.DropTableIfExists(models.Unit{}); err != nil {
-		return
-	}
+
 	if err := repository.DropTableIfExists(models.AuthorizationHolder{}); err != nil {
 		return
 	}
@@ -13,9 +11,6 @@ func Migrate(repository Repository) {
 		return
 	}
 	if err := repository.DropTableIfExists(models.ActiveIngredientInteraction{}); err != nil {
-		return
-	}
-	if err := repository.DropTableIfExists(models.MedicamentApplication{}); err != nil {
 		return
 	}
 	if err := repository.DropTableIfExists(models.Medicament{}); err != nil {
@@ -45,6 +40,9 @@ func Migrate(repository Repository) {
 	if err := repository.DropTableIfExists(models.Citizen{}); err != nil {
 		return
 	}
+	if err := repository.DropTableIfExists(models.CitizenAddress{}); err != nil {
+		return
+	}
 
 	if err := repository.DropTableIfExists(models.Prescription{}); err != nil {
 		return
@@ -52,13 +50,7 @@ func Migrate(repository Repository) {
 	if err := repository.DropTableIfExists(models.PrescriptionMedicament{}); err != nil {
 		return
 	}
-	if err := repository.DropTableIfExists(models.PrescriptionState{}); err != nil {
-		return
-	}
 
-	if err := repository.AutoMigrate(models.Unit{}); err != nil {
-		return
-	}
 	if err := repository.AutoMigrate(models.AuthorizationHolder{}); err != nil {
 		return
 	}
@@ -66,9 +58,6 @@ func Migrate(repository Repository) {
 		return
 	}
 	if err := repository.AutoMigrate(models.ActiveIngredientInteraction{}); err != nil {
-		return
-	}
-	if err := repository.AutoMigrate(models.MedicamentApplication{}); err != nil {
 		return
 	}
 	if err := repository.AutoMigrate(models.Medicament{}); err != nil {
@@ -98,14 +87,14 @@ func Migrate(repository Repository) {
 	if err := repository.AutoMigrate(models.Citizen{}); err != nil {
 		return
 	}
+	if err := repository.AutoMigrate(models.CitizenAddress{}); err != nil {
+		return
+	}
 
 	if err := repository.AutoMigrate(models.Prescription{}); err != nil {
 		return
 	}
 	if err := repository.AutoMigrate(models.PrescriptionMedicament{}); err != nil {
-		return
-	}
-	if err := repository.AutoMigrate(models.PrescriptionState{}); err != nil {
 		return
 	}
 }

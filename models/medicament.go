@@ -1,54 +1,60 @@
 package models
 
-type Unit struct {
-	ID   TModelID `gorm:"not null;type:uuid;primary_key"`
-	Unit TShortText
-}
+type Unit string
 
-type MedicamentApplication struct {
-	ID          TModelID `gorm:"not null;type:uuid;primary_key"`
-	Application TShortText
-}
+const (
+	Milligrams Unit = "mg"
+	Grams      Unit = "g"
+)
+
+type MedicamentApplication string
+
+const (
+	HardTablets MedicamentApplication = "hard_tablets"
+	SoftTables  MedicamentApplication = "soft_tables"
+)
 
 type AuthorizationHolder struct {
-	ID      TModelID `gorm:"not null;type:uuid;primary_key"`
-	Name    TShortText
-	Country TShortText
+	ID      ModelID `gorm:"not null;type:uuid;primary_key"`
+	Name    Text
+	Country Text
 }
 
 type ActiveIngredient struct {
-	ID                  TModelID `gorm:"not null;type:uuid;primary_key"`
-	OfficialName        TShortText
-	BulgarianName       TShortText
-	MaximumDosage       float32
-	MaximumDosageUnitID TModelID `gorm:"not null;type:uuid"`
-	MaximumDosageUnit   Unit     `gorm:"foreignKey:MaximumDosageUnitID;references:ID"`
-	Description         TLongtext
+	ID            ModelID `gorm:"not null;type:uuid;primary_key"`
+	OfficialName  Text
+	BulgarianName Text
+	Description   Text
 }
 
 type ActiveIngredientInteraction struct {
-	ActiveIngredient1ID TModelID         `gorm:"not null;type:uuid"`
+	ActiveIngredient1ID ModelID          `gorm:"not null;type:uuid"`
 	ActiveIngredient1   ActiveIngredient `gorm:"foreignKey:ActiveIngredient1ID;references:ID"`
-	ActiveIngredient2ID TModelID         `gorm:"not null;type:uuid"`
+	ActiveIngredient2ID ModelID          `gorm:"not null;type:uuid"`
 	ActiveIngredient2   ActiveIngredient `gorm:"foreignKey:ActiveIngredient2ID;references:ID"`
-	Description         TLongtext
+	Description         Text
+}
+
+type ActiveIngredientsMedicament struct {
+	ActiveIngredientID ModelID          `gorm:"primary_key;not null;type:uuid"`
+	ActiveIngredient   ActiveIngredient `gorm:"foreignKey:ActiveIngredientID;references:ID"`
+	Quantity           WholeQuantity
+	Unit               Unit `gorm:"type:enum('mg','g');"`
 }
 
 type Medicament struct {
-	ID                    TModelID `gorm:"not null;type:uuid;primary_key"`
+	ID                    ModelID `gorm:"not null;type:uuid;primary_key"`
 	RegionalNumber        int
-	Identification        TShortText
-	OfficialName          TShortText
-	BulgarianName         TShortText
-	Description           TLongtext
-	ActiveIngredients     []ActiveIngredient    `gorm:"many2many:active_ingredients_medicaments;"`
-	ApplicationID         TModelID              `gorm:"not null;type:uuid"`
-	Application           MedicamentApplication `gorm:"foreignKey:ApplicationID;references:ID"`
-	Quantity              int
-	UnitID                TModelID            `gorm:"not null;type:uuid"`
-	Unit                  Unit                `gorm:"foreignKey:UnitID;references:ID"`
-	AuthorizationHolderID TModelID            `gorm:"not null;type:uuid"`
+	Identification        Text
+	OfficialName          Text
+	BulgarianName         Text
+	Description           Text
+	ActiveIngredients     []ActiveIngredientsMedicament `gorm:"many2many:active_ingredients_medicament;"`
+	Application           MedicamentApplication         `gorm:"type:enum('hard_tablets','soft_tables');"`
+	ApplicationQuantity   int
+	ApplicationUnit       Unit                `gorm:"foreignKey:UnitID;references:ID"`
+	AuthorizationHolderID ModelID             `gorm:"not null;type:uuid"`
 	AuthorisationHolder   AuthorizationHolder `gorm:"foreignKey:AuthorizationHolderID;references:ID"`
-	ATC                   TShortText
+	ATC                   Text
 	RequiredPrescription  bool
 }

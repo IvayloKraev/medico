@@ -1,36 +1,43 @@
 package models
 
+import "time"
+
 type PharmacyBrand struct {
-	ID                  TModelID `gorm:"not null;type:uuid;primary_key"`
-	Name                TShortText
-	Website             TShortText
-	Owner               TShortText
-	HeadquartersAddress TShortText
+	ID                  ModelID `gorm:"not null;type:uuid;primary_key"`
+	Name                Text
+	Website             Text
+	Owner               Text
+	HeadquartersAddress Text
 	PharmacyBranches    []PharmacyBranch `gorm:"foreignKey:PharmacyBrandID;"`
 }
 
 type PharmacyBranch struct {
-	ID              TModelID `gorm:"not null;type:uuid;primary_key"`
-	Address         TShortText
-	PharmacyBrandID TModelID      `gorm:"not null;type:uuid"`
-	PharmacyBrand   PharmacyBrand `gorm:"foreignKey:PharmacyBrandID;references:ID"`
-	Latitude        float32
-	Longitude       float32
-	Storage         []PharmacyBranchStorage `gorm:"foreignKey:PharmacyBranchID;"`
-	Pharmacists     []Pharmacist            `gorm:"foreignKey:PharmacyBranchID;"`
+	ID                ModelID `gorm:"not null;type:uuid;primary_key"`
+	Address           Text
+	PharmacyBrandID   ModelID       `gorm:"not null;type:uuid"`
+	PharmacyBrand     PharmacyBrand `gorm:"foreignKey:PharmacyBrandID;references:ID"`
+	Latitude          float32
+	Longitude         float32
+	Storage           []PharmacyBranchStorage `gorm:"foreignKey:PharmacyBranchID;"`
+	Pharmacists       []Pharmacist            `gorm:"foreignKey:PharmacyBranchID;"`
+	WorkdaysStartTime time.Time
+	WorkdaysEndTime   time.Time
+	WeekendsStartTime time.Time
+	WeekendsEndTime   time.Time
 }
+
 type PharmacyBranchStorage struct {
-	PharmacyBranchID TModelID   `gorm:"not null;type:uuid"`
-	MedicamentID     TModelID   `gorm:"not null;type:uuid"`
+	PharmacyBranchID ModelID    `gorm:"not null;type:uuid"`
+	MedicamentID     ModelID    `gorm:"not null;type:uuid"`
 	Medicament       Medicament `gorm:"foreignKey:MedicamentID;references:ID"`
-	Quantity         int
+	Quantity         WholeQuantity
 }
 
 type Pharmacist struct {
-	ID               TModelID `gorm:"not null;type:uuid;primary_key"`
-	FirstName        TShortText
-	SecondName       TShortText
-	Surname          TShortText
-	PharmacyBranchID TModelID       `gorm:"not null;type:uuid"`
+	ID               ModelID `gorm:"not null;type:uuid;primary_key"`
+	FirstName        Text
+	SecondName       Text
+	Surname          Text
+	PharmacyBranchID ModelID        `gorm:"not null;type:uuid"`
 	PharmacyBranch   PharmacyBranch `gorm:"foreignKey:PharmacyBranchID;"`
 }
