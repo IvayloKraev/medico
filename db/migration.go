@@ -43,6 +43,9 @@ func Migrate(repository Repository) {
 	if err := repository.DropTableIfExists(models.CitizenAddress{}); err != nil {
 		return
 	}
+	if err := repository.DropTableIfExists(models.CitizenAuth{}); err != nil {
+		return
+	}
 
 	if err := repository.DropTableIfExists(models.Prescription{}); err != nil {
 		return
@@ -88,6 +91,9 @@ func Migrate(repository Repository) {
 		return
 	}
 	if err := repository.AutoMigrate(models.CitizenAddress{}); err != nil {
+		return
+	}
+	if err := repository.AutoMigrate(models.CitizenAuth{}); err != nil {
 		return
 	}
 

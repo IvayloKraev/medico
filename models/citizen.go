@@ -25,6 +25,13 @@ const (
 	VarnaCity City = "varna"
 )
 
+type CitizenAuth struct {
+	ID       ModelID `gorm:"primary_key;unique;type:uuid;not null;"`
+	Email    Text    `gorm:"type:text;not null"`
+	Password Text    `gorm:"type:text;not null"`
+	Citizen  Citizen `gorm:"foreignKey:ID;references:ID;"`
+}
+
 type Citizen struct {
 	ID               ModelID `gorm:"primaryKey;unique;type:uuid;not null;"`
 	FirstName        Text
