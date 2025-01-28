@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"medico/dto"
 	"medico/service"
 )
 
@@ -23,7 +24,17 @@ func NewCitizenController() CitizenController {
 }
 
 func (c *citizenController) Login(ctx *fiber.Ctx) error {
-	return errors.New("not implemented")
+	loginData := new(dto.CitizenLogin)
+
+	if err := ctx.BodyParser(loginData); err != nil {
+		return err
+	}
+
+	if err := loginData.Validate(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (c *citizenController) Prescription(ctx *fiber.Ctx) error {

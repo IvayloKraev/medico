@@ -5,10 +5,13 @@ import (
 	"medico/config"
 	"medico/db"
 	"medico/routes"
+	"medico/session"
 )
 
 func main() {
 	databaseConfig := config.LoadDatabaseConfig()
+
+	session.NewSession()
 
 	mainRepository := db.CreateNewRepository("main", databaseConfig)
 

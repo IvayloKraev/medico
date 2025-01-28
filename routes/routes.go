@@ -7,14 +7,13 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/session"
 	"medico/controllers"
 	"strings"
-	"time"
 )
 
 func SetUpRoutes(app *fiber.App) {
 	apiRoute := app.Group("/api")
 
 	setUpCORS(apiRoute)
-	setUpCSRF(apiRoute)
+	//setUpCSRF(apiRoute)
 
 	setUpCitizenRoute(apiRoute)
 }
@@ -53,23 +52,20 @@ func setUpCORS(router fiber.Router) {
 
 func setUpCSRF(router fiber.Router) {
 
-	sessConfig := session.Config{
-		Expiration: 30 * time.Minute,
-		KeyLookup:  "cookie:csrf_medico",
-	}
-	store := session.New(sessConfig)
+	store := session.New(session.Config{
+		KeyLookup: "cookie:csrf_medico",
+	})
 
 	router.Use(csrf.New(csrf.Config{
-		KeyLookup:      "cookie:csrf_medico",
-		CookieName:     "csrf_medico",
-		Session:        store,
-		SingleUseToken: true,
-		Extractor:      csrf.CsrfFromCookie("csrf_medico"),
+		KeyLookup:  "cookie:csrf_medico",
+		CookieName: "csrf_medico",
+		Session:    store,
+		//Extractor:      csrf.CsrfFromCookie("csrf_medico"),
 	}))
 
 	router.Get("/csrf-token", func(c *fiber.Ctx) error {
 		token := c.Cookies("csrf_medico")
-		return c.JSON(fiber.Map{"csrf_token": token})
+		return c.JSON(fiber.Map{"csrf_medico": token})
 	})
 
 }
