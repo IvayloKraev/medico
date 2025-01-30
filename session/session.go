@@ -12,14 +12,14 @@ import (
 
 type AuthSession interface {
 	VerifyAuthSession(sessionId uuid.UUID) error
-	CreateAuthSession(citizen models.Citizen) (error, string)
+	CreateAuthSession(citizen models.CitizenAuth) (string, error)
 	GetDataAuthSession(sessionId uuid.UUID) authSessionData // TODO change to models.Citizen or something like that
 	DeleteAuthSession(sessionId uuid.UUID) error
 }
 
 type authSessionData struct {
-	userId    models.ModelID
-	createdAt time.Time
+	UserId    models.ModelID `json:"userId"`
+	CreatedAt time.Time      `json:"createdAt"`
 }
 
 type authSession struct {
@@ -27,7 +27,7 @@ type authSession struct {
 	ctx         context.Context
 }
 
-func NewSession() AuthSession {
+func NewAuthSession() AuthSession {
 	client := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Username: "default",
@@ -55,20 +55,26 @@ func (s *authSession) VerifyAuthSession(sessionId uuid.UUID) error {
 	return nil
 }
 
-func (s *authSession) CreateAuthSession(citizen models.Citizen) (error, string) {
+func (s *authSession) CreateAuthSession(citizen models.CitizenAuth) (string, error) {
 	newAuthSessionData := &authSessionData{
-		userId:    citizen.ID,
-		createdAt: time.Now(),
+		UserId:    citizen.ID,
+		CreatedAt: time.Now(),
 	}
 
 	authSessionDataMarshaled, err := json.Marshal(newAuthSessionData)
+
 	if err != nil {
-		return err, ""
+		return "", err
 	}
 
 	newSessionId := uuid.New().String()
 
-	return s.redisClient.Set(s.ctx, newSessionId, authSessionDataMarshaled, 1000).Err(), newSessionId
+	err = s.redisClient.Set(s.ctx, newSessionId, authSessionDataMarshaled, 0).Err()
+	if err != nil {
+		return "", err
+	}
+
+	return newSessionId, nil
 }
 
 func (s *authSession) GetDataAuthSession(sessionId uuid.UUID) authSessionData {
