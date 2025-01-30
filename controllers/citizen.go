@@ -34,7 +34,18 @@ func (c *citizenController) Login(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	return nil
+	err, m := c.service.AuthenticateByEmailAndPassword(loginData.Email.ToString(), loginData.Password.ToString())
+	if err != nil {
+		return err
+	}
+
+	session, err := c.service.CreateAuthenticateSession(m)
+
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(200).JSON(session)
 }
 
 func (c *citizenController) Prescription(ctx *fiber.Ctx) error {
