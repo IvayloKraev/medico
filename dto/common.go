@@ -7,15 +7,27 @@ import (
 	"medico/errors"
 )
 
-type IValidate interface {
+type Validate interface {
 	Validate() error
+}
+
+type ToString interface {
+	String() string
 }
 
 type Email string
 type Password string
 
-func (email *Email) Validate() error {
-	result := validators.ValidateEmail(string(*email))
+func (password Password) ToString() string {
+	return string(password)
+}
+
+func (email Email) ToString() string {
+	return string(email)
+}
+
+func (email Email) Validate() error {
+	result := validators.ValidateEmail(email.ToString())
 
 	if result != nil {
 		return errors.New(fmt.Sprintf("%s - %s", medicoErrors.InvalidEmail, medicoErrors.IncorrectEmail))
@@ -24,8 +36,8 @@ func (email *Email) Validate() error {
 	return nil
 }
 
-func (password *Password) Validate() error {
-	lowerCaseResult := validators.ValidateNumberOfLowerCase(string(*password))
+func (password Password) Validate() error {
+	lowerCaseResult := validators.ValidateNumberOfLowerCase(password.ToString())
 
 	if lowerCaseResult != nil {
 	}
