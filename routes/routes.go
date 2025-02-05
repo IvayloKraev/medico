@@ -4,7 +4,8 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/csrf"
-	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/gofiber/storage/redis/v3"
+	"medico/config"
 	"medico/controllers"
 	"strings"
 )
@@ -13,7 +14,7 @@ func SetUpRoutes(app *fiber.App) {
 	apiRoute := app.Group("/api")
 
 	setUpCORS(apiRoute)
-	//setUpCSRF(apiRoute)
+	setUpCSRF(apiRoute)
 
 	setUpCitizenRoute(apiRoute)
 }
@@ -51,23 +52,25 @@ func setUpCORS(router fiber.Router) {
 }
 
 func setUpCSRF(router fiber.Router) {
-
-	store := session.New(session.Config{
-		KeyLookup: "cookie:csrf_medico",
-	})
+	csrfConfig := config.LoadCSRFTokenConfig()
 
 	router.Use(csrf.New(csrf.Config{
-		KeyLookup:  "cookie:csrf_medico",
-		CookieName: "csrf_medico",
-		Session:    store,
-		//Extractor:      csrf.CsrfFromCookie("csrf_medico"),
+		CookieName: csrfConfig.CookieName,
+		Storage: redis.New(redis.Config{
+			Host:     csrfConfig.Host,
+			Port:     csrfConfig.Port,
+			Username: csrfConfig.Username,
+			Reset:    csrfConfig.Reset,
+			Database: csrfConfig.Database,
+		}),
+		Extractor:      csrf.CsrfFromCookie(csrfConfig.CookieName),
+		SingleUseToken: csrfConfig.SingleUseToken,
+		Expiration:     csrfConfig.Expiration,
 	}))
 
 	router.Get("/csrf-token", func(c *fiber.Ctx) error {
-		token := c.Cookies("csrf_medico")
-		return c.JSON(fiber.Map{"csrf_medico": token})
+		return c.Status(fiber.StatusOK).JSON(nil)
 	})
-
 }
 
 func setUpCitizenRoute(router fiber.Router) {
