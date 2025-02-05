@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"medico/dto"
 	"medico/service"
+	"time"
 )
 
 type CitizenController interface {
@@ -39,13 +40,19 @@ func (c *citizenController) Login(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	session, err := c.service.CreateAuthenticateSession(m)
+	session, expiry, err := c.service.CreateAuthenticateSession(m)
 
 	if err != nil {
 		return err
 	}
 
-	return ctx.Status(200).JSON(session)
+	ctx.Cookie(&fiber.Cookie{
+		Name:    "medico_session",
+		Value:   session.String(),
+		Expires: time.Now().Add(expiry),
+	})
+
+	return ctx.Status(200).JSON(nil)
 }
 
 func (c *citizenController) Prescription(ctx *fiber.Ctx) error {
