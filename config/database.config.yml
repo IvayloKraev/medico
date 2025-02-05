@@ -4,4 +4,4 @@ port: 3306
 dbname: medico
 username: medico
 password: medico
-migration: true
+migration: false
