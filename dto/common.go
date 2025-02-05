@@ -3,7 +3,6 @@ package dto
 import (
 	"errors"
 	"fmt"
-	"medico/dto/validators"
 	"medico/errors"
 )
 
@@ -12,7 +11,7 @@ type Validate interface {
 }
 
 type ToString interface {
-	String() string
+	ToString() string
 }
 
 type Email string
@@ -27,7 +26,7 @@ func (email Email) ToString() string {
 }
 
 func (email Email) Validate() error {
-	result := validators.ValidateEmail(email.ToString())
+	result := validateEmail(email.ToString())
 
 	if result != nil {
 		return errors.New(fmt.Sprintf("%s - %s", medicoErrors.InvalidEmail, medicoErrors.IncorrectEmail))
@@ -37,10 +36,17 @@ func (email Email) Validate() error {
 }
 
 func (password Password) Validate() error {
-	lowerCaseResult := validators.ValidateNumberOfLowerCase(password.ToString())
+	lowerCaseResult := validateNumberOfLowerCase(password.ToString())
+	upperCaseResult := validateNumberOfUpperCase(password.ToString())
+	numberOfDigitsResult := validateNumberOfDigits(password.ToString())
+	numberOfSpecialCharacters := validateNumberOfSpecialCharacters(password.ToString())
+	notIncludedWhiteSpacesResult := validateNotIncludedWhiteSpaces(password.ToString())
 
-	if lowerCaseResult != nil {
-	}
-
-	return errors.ErrUnsupported
+	return errors.Join(
+		lowerCaseResult,
+		upperCaseResult,
+		numberOfDigitsResult,
+		numberOfSpecialCharacters,
+		notIncludedWhiteSpacesResult,
+	)
 }
