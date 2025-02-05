@@ -12,7 +12,9 @@ func main() {
 
 	mainRepository := db.CreateNewRepository("main", databaseConfig)
 
-	db.Migrate(mainRepository)
+	if databaseConfig.Migration {
+		db.Migrate(mainRepository)
+	}
 
 	medicoFiber := fiber.New()
 
