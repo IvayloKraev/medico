@@ -1,98 +1,88 @@
 package session
 
 import (
-	"context"
-	"encoding/json"
 	"errors"
+	"github.com/gofiber/storage/redis/v3"
 	"github.com/google/uuid"
-	"github.com/redis/go-redis/v9"
+	"medico/config"
 	"medico/models"
 	"time"
 )
 
 type AuthSession interface {
 	VerifyAuthSession(sessionId uuid.UUID) error
-	CreateAuthSession(citizen models.CitizenAuth) (string, error)
-	GetDataAuthSession(sessionId uuid.UUID) authSessionData // TODO change to models.Citizen or something like that
+	CreateAuthSession(citizen models.CitizenAuth) (uuid.UUID, time.Duration, error)
+	GetDataAuthSession(sessionId uuid.UUID) (uuid.UUID, error)
 	DeleteAuthSession(sessionId uuid.UUID) error
 }
 
-type authSessionData struct {
-	UserId    models.ModelID `json:"userId"`
-	CreatedAt time.Time      `json:"createdAt"`
-}
-
 type authSession struct {
-	redisClient *redis.Client
-	ctx         context.Context
+	sessionStore  *redis.Storage
+	sessionExpiry time.Duration
 }
 
 func NewAuthSession() AuthSession {
-	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Username: "default",
-	})
-
-	ctx := context.Background()
+	sessionConfig := config.LoadAuthSessionConfig()
 
 	return &authSession{
-		redisClient: client,
-		ctx:         ctx,
+		sessionStore: redis.New(redis.Config{
+			Host:     sessionConfig.Host,
+			Port:     sessionConfig.Port,
+			Username: sessionConfig.Username,
+			Reset:    sessionConfig.Reset,
+			Database: sessionConfig.Database,
+		}),
+		sessionExpiry: sessionConfig.Expiration,
 	}
 }
 
 func (s *authSession) VerifyAuthSession(sessionId uuid.UUID) error {
-	userAuthSession, err := s.redisClient.Get(s.ctx, sessionId.String()).Result()
-
+	userAuthSessionRaw, err := s.sessionStore.Get(sessionId.String())
 	if err != nil {
 		return err
 	}
 
-	if userAuthSession == "" {
-		return errors.New("invalid session")
+	userAuthSession, err := uuid.FromBytes(userAuthSessionRaw)
+	if err != nil {
+		return err
+	}
+
+	if userAuthSession != sessionId {
+		return errors.New("invalid session id")
 	}
 
 	return nil
 }
 
-func (s *authSession) CreateAuthSession(citizen models.CitizenAuth) (string, error) {
-	newAuthSessionData := &authSessionData{
-		UserId:    citizen.ID,
-		CreatedAt: time.Now(),
-	}
-
-	authSessionDataMarshaled, err := json.Marshal(newAuthSessionData)
-
+func (s *authSession) CreateAuthSession(citizen models.CitizenAuth) (uuid.UUID, time.Duration, error) {
+	binaryUserId, err := citizen.ID.MarshalBinary()
 	if err != nil {
-		return "", err
+		return uuid.Nil, 0, err
 	}
 
-	newSessionId := uuid.New().String()
+	newSessionId := uuid.New()
 
-	err = s.redisClient.Set(s.ctx, newSessionId, authSessionDataMarshaled, 0).Err()
-	if err != nil {
-		return "", err
+	if err := s.sessionStore.Set(newSessionId.String(), binaryUserId, s.sessionExpiry); err != nil {
+		return uuid.Nil, 0, err
 	}
 
-	return newSessionId, nil
+	return newSessionId, s.sessionExpiry, nil
 }
 
-func (s *authSession) GetDataAuthSession(sessionId uuid.UUID) authSessionData {
-	result, err := s.redisClient.Get(s.ctx, sessionId.String()).Result()
+func (s *authSession) GetDataAuthSession(sessionId uuid.UUID) (uuid.UUID, error) {
+	result, err := s.sessionStore.Get(sessionId.String())
 	if err != nil {
-		return authSessionData{}
+		return uuid.Nil, err
 	}
 
-	var receivedAuthSessionData authSessionData
-	err = json.Unmarshal([]byte(result), &receivedAuthSessionData)
-
+	sessionUuid, err := uuid.FromBytes(result)
 	if err != nil {
-		return authSessionData{}
+		return uuid.Nil, err
 	}
 
-	return receivedAuthSessionData
+	return sessionUuid, nil
 }
 
 func (s *authSession) DeleteAuthSession(sessionId uuid.UUID) error {
-	return s.redisClient.Del(s.ctx, sessionId.String()).Err()
+	return s.sessionStore.Delete(sessionId.String())
 }
