@@ -1,9 +1,12 @@
 package models
 
-import "time"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type PharmacyBrand struct {
-	ID                  ModelID `gorm:"not null;type:uuid;primary_key"`
+	ID                  uuid.UUID `gorm:"not null;type:uuid;primary_key"`
 	Name                Text
 	Website             Text
 	Owner               Text
@@ -12,9 +15,9 @@ type PharmacyBrand struct {
 }
 
 type PharmacyBranch struct {
-	ID                ModelID `gorm:"not null;type:uuid;primary_key"`
+	ID                uuid.UUID `gorm:"not null;type:uuid;primary_key"`
 	Address           Text
-	PharmacyBrandID   ModelID       `gorm:"not null;type:uuid"`
+	PharmacyBrandID   uuid.UUID     `gorm:"not null;type:uuid"`
 	PharmacyBrand     PharmacyBrand `gorm:"foreignKey:PharmacyBrandID;references:ID"`
 	Latitude          float32
 	Longitude         float32
@@ -27,17 +30,17 @@ type PharmacyBranch struct {
 }
 
 type PharmacyBranchStorage struct {
-	PharmacyBranchID ModelID    `gorm:"not null;type:uuid"`
-	MedicamentID     ModelID    `gorm:"not null;type:uuid"`
+	PharmacyBranchID uuid.UUID  `gorm:"not null;type:uuid"`
+	MedicamentID     uuid.UUID  `gorm:"not null;type:uuid"`
 	Medicament       Medicament `gorm:"foreignKey:MedicamentID;references:ID"`
 	Quantity         WholeQuantity
 }
 
 type Pharmacist struct {
-	ID               ModelID `gorm:"not null;type:uuid;primary_key"`
+	ID               uuid.UUID `gorm:"not null;type:uuid;primary_key"`
 	FirstName        Text
 	SecondName       Text
 	Surname          Text
-	PharmacyBranchID ModelID        `gorm:"not null;type:uuid"`
+	PharmacyBranchID uuid.UUID      `gorm:"not null;type:uuid"`
 	PharmacyBranch   PharmacyBranch `gorm:"foreignKey:PharmacyBranchID;"`
 }

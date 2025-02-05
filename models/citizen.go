@@ -1,5 +1,7 @@
 package models
 
+import "github.com/google/uuid"
+
 type Sex string
 
 const (
@@ -26,14 +28,14 @@ const (
 )
 
 type CitizenAuth struct {
-	ID       ModelID `gorm:"primary_key;unique;type:uuid;not null;"`
-	Email    Text    `gorm:"type:text;not null"`
-	Password Text    `gorm:"type:text;not null"`
-	Citizen  Citizen `gorm:"foreignKey:ID;references:ID;"`
+	ID       uuid.UUID `gorm:"primary_key;unique;type:uuid;not null;"`
+	Email    Text      `gorm:"type:text;not null"`
+	Password Text      `gorm:"type:text;not null"`
+	Citizen  Citizen   `gorm:"foreignKey:ID;references:ID;"`
 }
 
 type Citizen struct {
-	ID               ModelID `gorm:"primaryKey;unique;type:uuid;not null;"`
+	ID               uuid.UUID `gorm:"primaryKey;unique;type:uuid;not null;"`
 	FirstName        Text
 	SecondName       Text
 	Surname          Text
@@ -44,15 +46,15 @@ type Citizen struct {
 	Weight           float32
 	Email            Text
 	PhoneNumber      Text
-	AddressID        ModelID        `gorm:"type:uuid;not null"`
+	AddressID        uuid.UUID      `gorm:"type:uuid;not null"`
 	Address          CitizenAddress `gorm:"foreignKey:AddressID;references:ID;"`
-	PersonalDoctorID ModelID        `gorm:"type:uuid;not null;"`
+	PersonalDoctorID uuid.UUID      `gorm:"type:uuid;not null;"`
 	PersonalDoctor   Doctor         `gorm:"foreignKey:PersonalDoctorID;references:ID;"`
 	Prescriptions    []Prescription `gorm:"foreignKey:CitizenID;"`
 }
 
 type CitizenAddress struct {
-	ID                  ModelID      `gorm:"primaryKey;unique;type:uuid;not null"`
+	ID                  uuid.UUID    `gorm:"primaryKey;unique;type:uuid;not null"`
 	Province            Province     `gorm:"type:enum('varna')not null;"`
 	Municipality        Municipality `gorm:"type:enum('varna');not null;"`
 	City                City         `gorm:"type:enum('varna');not null;"`
