@@ -63,7 +63,7 @@ func validateTotalNumberOfCharacters(password string) error {
 func validateNotIncludedWhiteSpaces(password string) error {
 	var spaceRegexp = regexp.MustCompile(spacePattern)
 
-	if !spaceRegexp.MatchString(password) {
+	if spaceRegexp.MatchString(password) {
 		return errors.New(medicoErrors.IncludedWhiteSpace)
 	}
 	return nil

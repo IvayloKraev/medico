@@ -40,6 +40,7 @@ func (password Password) Validate() error {
 	upperCaseResult := validateNumberOfUpperCase(password.ToString())
 	numberOfDigitsResult := validateNumberOfDigits(password.ToString())
 	numberOfSpecialCharacters := validateNumberOfSpecialCharacters(password.ToString())
+	numberOfCharacters := validateTotalNumberOfCharacters(password.ToString())
 	notIncludedWhiteSpacesResult := validateNotIncludedWhiteSpaces(password.ToString())
 
 	return errors.Join(
@@ -47,6 +48,7 @@ func (password Password) Validate() error {
 		upperCaseResult,
 		numberOfDigitsResult,
 		numberOfSpecialCharacters,
+		numberOfCharacters,
 		notIncludedWhiteSpacesResult,
 	)
 }
