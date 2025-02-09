@@ -2,16 +2,16 @@ package session
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gofiber/storage/redis/v3"
 	"github.com/google/uuid"
 	"medico/config"
-	"medico/models"
 	"time"
 )
 
 type AuthSession interface {
 	VerifyAuthSession(sessionId uuid.UUID) error
-	CreateAuthSession(citizen models.CitizenAuth) (uuid.UUID, time.Duration, error)
+	CreateAuthSession(userId uuid.UUID) (uuid.UUID, time.Duration, error)
 	GetDataAuthSession(sessionId uuid.UUID) (uuid.UUID, error)
 	DeleteAuthSession(sessionId uuid.UUID) error
 }
@@ -19,9 +19,10 @@ type AuthSession interface {
 type authSession struct {
 	sessionStore  *redis.Storage
 	sessionExpiry time.Duration
+	role          string
 }
 
-func NewAuthSession() AuthSession {
+func NewAuthSession(role string) AuthSession {
 	sessionConfig := config.LoadAuthSessionConfig()
 
 	return &authSession{
@@ -33,16 +34,12 @@ func NewAuthSession() AuthSession {
 			Database: sessionConfig.Database,
 		}),
 		sessionExpiry: sessionConfig.Expiration,
+		role:          role,
 	}
 }
 
 func (s *authSession) VerifyAuthSession(sessionId uuid.UUID) error {
-	userAuthSessionRaw, err := s.sessionStore.Get(sessionId.String())
-	if err != nil {
-		return err
-	}
-
-	userAuthSession, err := uuid.FromBytes(userAuthSessionRaw)
+	userAuthSession, err := s.GetDataAuthSession(sessionId)
 	if err != nil {
 		return err
 	}
@@ -54,15 +51,15 @@ func (s *authSession) VerifyAuthSession(sessionId uuid.UUID) error {
 	return nil
 }
 
-func (s *authSession) CreateAuthSession(citizen models.CitizenAuth) (uuid.UUID, time.Duration, error) {
-	binaryUserId, err := citizen.ID.MarshalBinary()
+func (s *authSession) CreateAuthSession(userId uuid.UUID) (uuid.UUID, time.Duration, error) {
+	binaryUserId, err := userId.MarshalBinary()
 	if err != nil {
 		return uuid.Nil, 0, err
 	}
 
 	newSessionId := uuid.New()
 
-	if err := s.sessionStore.Set(newSessionId.String(), binaryUserId, s.sessionExpiry); err != nil {
+	if err := s.sessionStore.Set(fmt.Sprintf("%s:%s", s.role, newSessionId.String()), binaryUserId, s.sessionExpiry); err != nil {
 		return uuid.Nil, 0, err
 	}
 
@@ -70,7 +67,7 @@ func (s *authSession) CreateAuthSession(citizen models.CitizenAuth) (uuid.UUID, 
 }
 
 func (s *authSession) GetDataAuthSession(sessionId uuid.UUID) (uuid.UUID, error) {
-	result, err := s.sessionStore.Get(sessionId.String())
+	result, err := s.sessionStore.Get(fmt.Sprintf("%s:%s", s.role, sessionId.String()))
 	if err != nil {
 		return uuid.Nil, err
 	}
@@ -84,5 +81,5 @@ func (s *authSession) GetDataAuthSession(sessionId uuid.UUID) (uuid.UUID, error)
 }
 
 func (s *authSession) DeleteAuthSession(sessionId uuid.UUID) error {
-	return s.sessionStore.Delete(sessionId.String())
+	return s.sessionStore.Delete(fmt.Sprintf("%s:%s", s.role, sessionId.String()))
 }

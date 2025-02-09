@@ -40,7 +40,7 @@ func (c *citizenController) Login(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	session, expiry, err := c.service.CreateAuthenticateSession(m)
+	session, expiry, err := c.service.CreateAuthenticateSession(m.ID)
 
 	if err != nil {
 		return err

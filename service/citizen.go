@@ -13,7 +13,7 @@ import (
 
 type CitizenService interface {
 	AuthenticateByEmailAndPassword(email string, password string) (error, models.CitizenAuth)
-	CreateAuthenticateSession(citizenAuth models.CitizenAuth) (uuid.UUID, time.Duration, error)
+	CreateAuthenticateSession(citizenId uuid.UUID) (uuid.UUID, time.Duration, error)
 	VerifyAuthenticateSession(sessionID uuid.UUID) (uuid.UUID, error)
 	FindAllAvailablePharmacies() error
 	ListPrescriptions() error
@@ -26,7 +26,7 @@ type citizenService struct {
 
 func NewCitizenService() CitizenService {
 	return &citizenService{
-		authSession:    session.NewAuthSession(),
+		authSession:    session.NewAuthSession("citizen"),
 		authRepository: db.CreateNewRepository("Citizen", config.LoadDatabaseConfig()),
 	}
 }
@@ -47,8 +47,8 @@ func (c *citizenService) AuthenticateByEmailAndPassword(email string, password s
 	return nil, currentCitizen
 }
 
-func (c *citizenService) CreateAuthenticateSession(citizenAuth models.CitizenAuth) (uuid.UUID, time.Duration, error) {
-	return c.authSession.CreateAuthSession(citizenAuth)
+func (c *citizenService) CreateAuthenticateSession(citizenId uuid.UUID) (uuid.UUID, time.Duration, error) {
+	return c.authSession.CreateAuthSession(citizenId)
 }
 
 func (c *citizenService) VerifyAuthenticateSession(sessionId uuid.UUID) (uuid.UUID, error) {
