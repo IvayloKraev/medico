@@ -11,6 +11,7 @@ import (
 
 type CitizenController interface {
 	Login(c *fiber.Ctx) error
+	Logout(c *fiber.Ctx) error
 	VerifySession(c *fiber.Ctx) error
 	Prescription(c *fiber.Ctx) error
 	AvailablePharmacies(c *fiber.Ctx) error
@@ -57,6 +58,28 @@ func (c *citizenController) Login(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(nil)
 }
 
+func (c *citizenController) Logout(ctx *fiber.Ctx) error {
+	sessionId, err := uuid.Parse(ctx.Cookies("medico_session", uuid.Nil.String()))
+	if err != nil {
+		return err
+	}
+
+	if sessionId == uuid.Nil {
+		return errors.New("not logged in")
+	}
+
+	if err := c.service.DeleteAuthenticateSession(sessionId); err != nil {
+		return err
+	}
+
+	ctx.Cookie(&fiber.Cookie{
+		Name:    "medico_session",
+		Expires: time.Now().Add(-(time.Hour * 2)),
+	})
+
+	return ctx.Status(200).JSON(nil)
+}
+
 func (c *citizenController) VerifySession(ctx *fiber.Ctx) error {
 	if ctx.Path() == "/api/citizen/login" {
 		return ctx.Next()
@@ -65,6 +88,10 @@ func (c *citizenController) VerifySession(ctx *fiber.Ctx) error {
 	sessionId, err := uuid.Parse(ctx.Cookies("medico_session", uuid.Nil.String()))
 	if err != nil {
 		return err
+	}
+
+	if sessionId == uuid.Nil {
+		return errors.New("not logged in")
 	}
 
 	userId, err := c.service.VerifyAuthenticateSession(sessionId)

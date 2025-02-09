@@ -15,6 +15,7 @@ type CitizenService interface {
 	AuthenticateByEmailAndPassword(email string, password string) (error, models.CitizenAuth)
 	CreateAuthenticateSession(citizenId uuid.UUID) (uuid.UUID, time.Duration, error)
 	VerifyAuthenticateSession(sessionID uuid.UUID) (uuid.UUID, error)
+	DeleteAuthenticateSession(sessionID uuid.UUID) error
 	FindAllAvailablePharmacies() error
 	ListPrescriptions() error
 }
@@ -53,6 +54,10 @@ func (c *citizenService) CreateAuthenticateSession(citizenId uuid.UUID) (uuid.UU
 
 func (c *citizenService) VerifyAuthenticateSession(sessionId uuid.UUID) (uuid.UUID, error) {
 	return c.authSession.GetDataAuthSession(sessionId)
+}
+
+func (c *citizenService) DeleteAuthenticateSession(sessionID uuid.UUID) error {
+	return c.authSession.DeleteAuthSession(sessionID)
 }
 
 func (c *citizenService) FindAllAvailablePharmacies() error {
