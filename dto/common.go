@@ -3,19 +3,30 @@ package dto
 import (
 	"errors"
 	"fmt"
-	"medico/dto/validators"
 	"medico/errors"
 )
 
-type IValidate interface {
+type Validate interface {
 	Validate() error
+}
+
+type ToString interface {
+	ToString() string
 }
 
 type Email string
 type Password string
 
-func (email *Email) Validate() error {
-	result := validators.ValidateEmail(string(*email))
+func (password Password) ToString() string {
+	return string(password)
+}
+
+func (email Email) ToString() string {
+	return string(email)
+}
+
+func (email Email) Validate() error {
+	result := validateEmail(email.ToString())
 
 	if result != nil {
 		return errors.New(fmt.Sprintf("%s - %s", medicoErrors.InvalidEmail, medicoErrors.IncorrectEmail))
@@ -24,11 +35,20 @@ func (email *Email) Validate() error {
 	return nil
 }
 
-func (password *Password) Validate() error {
-	lowerCaseResult := validators.ValidateNumberOfLowerCase(string(*password))
+func (password Password) Validate() error {
+	lowerCaseResult := validateNumberOfLowerCase(password.ToString())
+	upperCaseResult := validateNumberOfUpperCase(password.ToString())
+	numberOfDigitsResult := validateNumberOfDigits(password.ToString())
+	numberOfSpecialCharacters := validateNumberOfSpecialCharacters(password.ToString())
+	numberOfCharacters := validateTotalNumberOfCharacters(password.ToString())
+	notIncludedWhiteSpacesResult := validateNotIncludedWhiteSpaces(password.ToString())
 
-	if lowerCaseResult != nil {
-	}
-
-	return errors.ErrUnsupported
+	return errors.Join(
+		lowerCaseResult,
+		upperCaseResult,
+		numberOfDigitsResult,
+		numberOfSpecialCharacters,
+		numberOfCharacters,
+		notIncludedWhiteSpacesResult,
+	)
 }

@@ -4,10 +4,10 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/csrf"
-	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/gofiber/storage/redis/v3"
+	"medico/config"
 	"medico/controllers"
 	"strings"
-	"time"
 )
 
 func SetUpRoutes(app *fiber.App) {
@@ -52,33 +52,34 @@ func setUpCORS(router fiber.Router) {
 }
 
 func setUpCSRF(router fiber.Router) {
-
-	sessConfig := session.Config{
-		Expiration: 30 * time.Minute,
-		KeyLookup:  "cookie:csrf_medico",
-	}
-	store := session.New(sessConfig)
+	csrfConfig := config.LoadCSRFTokenConfig()
 
 	router.Use(csrf.New(csrf.Config{
-		KeyLookup:      "cookie:csrf_medico",
-		CookieName:     "csrf_medico",
-		Session:        store,
-		SingleUseToken: true,
-		Extractor:      csrf.CsrfFromCookie("csrf_medico"),
+		CookieName: csrfConfig.CookieName,
+		Storage: redis.New(redis.Config{
+			Host:     csrfConfig.Host,
+			Port:     csrfConfig.Port,
+			Username: csrfConfig.Username,
+			Reset:    csrfConfig.Reset,
+			Database: csrfConfig.Database,
+		}),
+		Extractor:      csrf.CsrfFromCookie(csrfConfig.CookieName),
+		SingleUseToken: csrfConfig.SingleUseToken,
+		Expiration:     csrfConfig.Expiration,
 	}))
 
 	router.Get("/csrf-token", func(c *fiber.Ctx) error {
-		token := c.Cookies("csrf_medico")
-		return c.JSON(fiber.Map{"csrf_token": token})
+		return c.Status(fiber.StatusOK).JSON(nil)
 	})
-
 }
 
 func setUpCitizenRoute(router fiber.Router) {
 	citizen := controllers.NewCitizenController()
 
 	citizenRoute := router.Group("/citizen")
+	citizenRoute.Use(citizen.VerifySession)
 	citizenRoute.Post("/login", citizen.Login)
+	citizenRoute.Post("/logout", citizen.Logout)
 	citizenRoute.Get("/prescriptions", citizen.Prescription)
 	citizenRoute.Get("/available_pharmacies", citizen.AvailablePharmacies)
 }
