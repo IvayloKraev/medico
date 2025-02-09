@@ -3,6 +3,7 @@ package controllers
 import (
 	"errors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 	"medico/dto"
 	"medico/service"
 	"time"
@@ -10,6 +11,7 @@ import (
 
 type CitizenController interface {
 	Login(c *fiber.Ctx) error
+	VerifySession(c *fiber.Ctx) error
 	Prescription(c *fiber.Ctx) error
 	AvailablePharmacies(c *fiber.Ctx) error
 }
@@ -53,6 +55,26 @@ func (c *citizenController) Login(ctx *fiber.Ctx) error {
 	})
 
 	return ctx.Status(200).JSON(nil)
+}
+
+func (c *citizenController) VerifySession(ctx *fiber.Ctx) error {
+	if ctx.Path() == "/api/citizen/login" {
+		return ctx.Next()
+	}
+
+	sessionId, err := uuid.Parse(ctx.Cookies("medico_session", uuid.Nil.String()))
+	if err != nil {
+		return err
+	}
+
+	userId, err := c.service.VerifyAuthenticateSession(sessionId)
+	if err != nil {
+		return err
+	}
+
+	ctx.Locals("citizenId", userId)
+
+	return ctx.Next()
 }
 
 func (c *citizenController) Prescription(ctx *fiber.Ctx) error {

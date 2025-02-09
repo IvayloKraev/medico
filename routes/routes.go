@@ -77,6 +77,7 @@ func setUpCitizenRoute(router fiber.Router) {
 	citizen := controllers.NewCitizenController()
 
 	citizenRoute := router.Group("/citizen")
+	citizenRoute.Use(citizen.VerifySession)
 	citizenRoute.Post("/login", citizen.Login)
 	citizenRoute.Get("/prescriptions", citizen.Prescription)
 	citizenRoute.Get("/available_pharmacies", citizen.AvailablePharmacies)
