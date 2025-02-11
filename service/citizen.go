@@ -4,9 +4,8 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"medico/config"
-	"medico/db"
 	"medico/models"
+	"medico/repo"
 	"medico/session"
 	"time"
 )
@@ -21,28 +20,26 @@ type CitizenService interface {
 }
 
 type citizenService struct {
-	authSession    session.AuthSession
-	authRepository db.Repository
+	authSession session.AuthSession
+	citizenRepo repo.CitizenRepo
 }
 
 func NewCitizenService() CitizenService {
 	return &citizenService{
-		authSession:    session.NewAuthSession("citizen"),
-		authRepository: db.CreateNewRepository("Citizen", config.LoadDatabaseConfig()),
+		authSession: session.NewAuthSession("citizen"),
+		citizenRepo: repo.NewCitizenRepo(),
 	}
 }
 
 func (c *citizenService) AuthenticateByEmailAndPassword(email string, password string) (error, models.CitizenAuth) {
-	var currentCitizen models.CitizenAuth
 
-	if err := c.authRepository.Where("email = ?", email).First(&currentCitizen).Error; err != nil {
-		return err, currentCitizen
+	currentCitizen, err := c.citizenRepo.FindAuthByEmail(email)
+	if err != nil {
+		return err, models.CitizenAuth{}
 	}
 
-	err := bcrypt.CompareHashAndPassword([]byte(currentCitizen.Password), []byte(password))
-
-	if err != nil {
-		return err, currentCitizen
+	if err := bcrypt.CompareHashAndPassword([]byte(currentCitizen.Password), []byte(password)); err != nil {
+		return err, models.CitizenAuth{}
 	}
 
 	return nil, currentCitizen
