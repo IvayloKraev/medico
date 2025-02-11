@@ -20,13 +20,16 @@ const (
 )
 
 type DatabaseConfig struct {
-	DBMS      DBMS   `yaml:"dbms"`
-	Host      string `yaml:"host"`
-	Port      uint16 `yaml:"port"`
-	DBName    string `yaml:"dbname"`
-	Username  string `yaml:"username"`
-	Password  string `yaml:"password"`
-	Migration bool   `yaml:"migration"`
+	DBMS     DBMS   `yaml:"dbms"`
+	Host     string `yaml:"host"`
+	Port     uint16 `yaml:"port"`
+	DBName   string `yaml:"dbname"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
+}
+
+type MigratorConfig struct {
+	Migration bool `yaml:"migration"`
 }
 
 type CSRFConfig struct {
@@ -66,6 +69,12 @@ func LoadDatabaseConfig() *DatabaseConfig {
 	databaseConfig := &DatabaseConfig{}
 	loadConfig(databaseConfigPath, databaseConfig)
 	return databaseConfig
+}
+
+func LoadMigrationConfig() *MigratorConfig {
+	migrationConfig := &MigratorConfig{}
+	loadConfig(databaseConfigPath, migrationConfig)
+	return migrationConfig
 }
 
 func LoadCSRFTokenConfig() *CSRFConfig {
