@@ -1,0 +1,8 @@
+host: localhost
+port: 6379
+reset: true
+username: default
+database: 5
+cookie_name: medico_csrf
+single_use_token: true
+expiration: 3600s

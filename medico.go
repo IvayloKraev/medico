@@ -2,15 +2,25 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"medico/db"
+	"medico/config"
+	"medico/repo"
 	"medico/routes"
 )
 
 func main() {
+	migrationConfig := config.LoadMigrationConfig()
+
+	if migrationConfig.Migration {
+		migrator := repo.NewMigratorRepo()
+		err := migrator.MigrateAll()
+		if err != nil {
+			panic(err)
+		}
+	}
+
 	medicoFiber := fiber.New()
 
 	routes.SetUpRoutes(medicoFiber)
 
-	db.Connect()
-	medicoFiber.Listen("0.0.0.0:3000")
+	_ = medicoFiber.Listen(":8080")
 }
