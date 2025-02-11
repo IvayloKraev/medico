@@ -3,17 +3,19 @@ package main
 import (
 	"github.com/gofiber/fiber/v2"
 	"medico/config"
-	"medico/db"
+	"medico/repo"
 	"medico/routes"
 )
 
 func main() {
-	databaseConfig := config.LoadDatabaseConfig()
+	migrationConfig := config.LoadMigrationConfig()
 
-	mainRepository := db.CreateNewRepository("main", databaseConfig)
-
-	if databaseConfig.Migration {
-		db.Migrate(mainRepository)
+	if migrationConfig.Migration {
+		migrator := repo.NewMigratorRepo()
+		err := migrator.MigrateAll()
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	medicoFiber := fiber.New()
