@@ -1,4 +1,4 @@
-package db
+package repo
 
 import (
 	"database/sql"
@@ -30,18 +30,17 @@ type Repository interface {
 }
 
 type repository struct {
-	name string
-	db   *gorm.DB
+	db *gorm.DB
 }
 
-func CreateNewRepository(name string, databaseConfig *config.DatabaseConfig) Repository {
+func CreateNewRepository(databaseConfig *config.DatabaseConfig) Repository {
 	db, err := createConnection(databaseConfig)
 
 	if err != nil {
 		panic(err)
 	}
 
-	return &repository{name: name, db: db}
+	return &repository{db: db}
 }
 
 func createConnection(databaseConfig *config.DatabaseConfig) (*gorm.DB, error) {
