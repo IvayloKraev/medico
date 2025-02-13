@@ -6,7 +6,7 @@ import (
 )
 
 type CitizenRepo interface {
-	FindAuthByEmail(email string) (models.CitizenAuth, error)
+	FindAuthByEmail(email string, citizenAuth *models.CitizenAuth) error
 }
 
 type citizenRepo struct {
@@ -18,8 +18,6 @@ func NewCitizenRepo() CitizenRepo {
 	return &citizenRepo{repo: CreateNewRepository(databaseConfig)}
 }
 
-func (c *citizenRepo) FindAuthByEmail(email string) (models.CitizenAuth, error) {
-	citizenAuth := models.CitizenAuth{}
-	err := c.repo.First(&citizenAuth, "email = ?", email).Error
-	return citizenAuth, err
+func (r *citizenRepo) FindAuthByEmail(email string, citizenAuth *models.CitizenAuth) error {
+	return r.repo.First(citizenAuth, "email = ?", email).Error
 }
