@@ -11,10 +11,10 @@ import (
 )
 
 type CitizenService interface {
-	AuthenticateByEmailAndPassword(email string, password string) (error, models.CitizenAuth)
-	CreateAuthenticateSession(citizenId uuid.UUID) (uuid.UUID, time.Duration, error)
-	VerifyAuthenticateSession(sessionID uuid.UUID) (uuid.UUID, error)
-	DeleteAuthenticateSession(sessionID uuid.UUID) error
+	AuthenticateByEmailAndPassword(email string, password string, citizenAuth *models.CitizenAuth) error
+	CreateAuthenticationSession(citizenId uuid.UUID) (uuid.UUID, time.Duration, error)
+	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
+	DeleteAuthenticationSession(sessionID uuid.UUID) error
 	FindAllAvailablePharmacies() error
 	ListPrescriptions() error
 }
@@ -31,29 +31,28 @@ func NewCitizenService() CitizenService {
 	}
 }
 
-func (c *citizenService) AuthenticateByEmailAndPassword(email string, password string) (error, models.CitizenAuth) {
+func (c *citizenService) AuthenticateByEmailAndPassword(email string, password string, citizenAuth *models.CitizenAuth) error {
 
-	currentCitizen, err := c.citizenRepo.FindAuthByEmail(email)
-	if err != nil {
-		return err, models.CitizenAuth{}
+	if err := c.citizenRepo.FindAuthByEmail(email, citizenAuth); err != nil {
+		return err
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(currentCitizen.Password), []byte(password)); err != nil {
-		return err, models.CitizenAuth{}
+	if err := bcrypt.CompareHashAndPassword([]byte(citizenAuth.Password), []byte(password)); err != nil {
+		return err
 	}
 
-	return nil, currentCitizen
+	return nil
 }
 
-func (c *citizenService) CreateAuthenticateSession(citizenId uuid.UUID) (uuid.UUID, time.Duration, error) {
+func (c *citizenService) CreateAuthenticationSession(citizenId uuid.UUID) (uuid.UUID, time.Duration, error) {
 	return c.authSession.CreateAuthSession(citizenId)
 }
 
-func (c *citizenService) VerifyAuthenticateSession(sessionId uuid.UUID) (uuid.UUID, error) {
-	return c.authSession.GetDataAuthSession(sessionId)
+func (c *citizenService) GetAuthenticationSession(sessionId uuid.UUID) (uuid.UUID, error) {
+	return c.authSession.GetAuthSession(sessionId)
 }
 
-func (c *citizenService) DeleteAuthenticateSession(sessionID uuid.UUID) error {
+func (c *citizenService) DeleteAuthenticationSession(sessionID uuid.UUID) error {
 	return c.authSession.DeleteAuthSession(sessionID)
 }
 

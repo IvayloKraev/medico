@@ -17,6 +17,7 @@ func SetUpRoutes(app *fiber.App) {
 	setUpCSRF(apiRoute)
 
 	setUpCitizenRoute(apiRoute)
+	setUpAdminRoutes(apiRoute)
 }
 
 func setUpCORS(router fiber.Router) {
@@ -82,4 +83,16 @@ func setUpCitizenRoute(router fiber.Router) {
 	citizenRoute.Post("/logout", citizen.Logout)
 	citizenRoute.Get("/prescriptions", citizen.Prescription)
 	citizenRoute.Get("/available_pharmacies", citizen.AvailablePharmacies)
+}
+
+func setUpAdminRoutes(router fiber.Router) {
+	admin := controllers.NewAdminController()
+
+	adminRoute := router.Group("/admin")
+	adminRoute.Use(admin.VerifySession)
+	adminRoute.Post("/login", admin.Login)
+	adminRoute.Post("/logout", admin.Logout)
+	adminRoute.Get("get_moderators", admin.GetModerators)
+	adminRoute.Post("/create_moderator", admin.AddModerator)
+	adminRoute.Delete("/delete_moderator", admin.DeleteModerator)
 }

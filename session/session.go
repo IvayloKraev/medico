@@ -1,7 +1,6 @@
 package session
 
 import (
-	"errors"
 	"fmt"
 	"github.com/gofiber/storage/redis/v3"
 	"github.com/google/uuid"
@@ -10,9 +9,8 @@ import (
 )
 
 type AuthSession interface {
-	VerifyAuthSession(sessionId uuid.UUID) error
 	CreateAuthSession(userId uuid.UUID) (uuid.UUID, time.Duration, error)
-	GetDataAuthSession(sessionId uuid.UUID) (uuid.UUID, error)
+	GetAuthSession(sessionId uuid.UUID) (uuid.UUID, error)
 	DeleteAuthSession(sessionId uuid.UUID) error
 }
 
@@ -38,46 +36,33 @@ func NewAuthSession(role string) AuthSession {
 	}
 }
 
-func (s *authSession) VerifyAuthSession(sessionId uuid.UUID) error {
-	userAuthSession, err := s.GetDataAuthSession(sessionId)
-	if err != nil {
-		return err
-	}
-
-	if userAuthSession != sessionId {
-		return errors.New("invalid session id")
-	}
-
-	return nil
-}
-
 func (s *authSession) CreateAuthSession(userId uuid.UUID) (uuid.UUID, time.Duration, error) {
-	binaryUserId, err := userId.MarshalBinary()
+	userIdBytes, err := userId.MarshalBinary()
 	if err != nil {
 		return uuid.Nil, 0, err
 	}
 
 	newSessionId := uuid.New()
 
-	if err := s.sessionStore.Set(fmt.Sprintf("%s:%s", s.role, newSessionId.String()), binaryUserId, s.sessionExpiry); err != nil {
+	if err := s.sessionStore.Set(fmt.Sprintf("%s:%s", s.role, newSessionId.String()), userIdBytes, s.sessionExpiry); err != nil {
 		return uuid.Nil, 0, err
 	}
 
 	return newSessionId, s.sessionExpiry, nil
 }
 
-func (s *authSession) GetDataAuthSession(sessionId uuid.UUID) (uuid.UUID, error) {
-	result, err := s.sessionStore.Get(fmt.Sprintf("%s:%s", s.role, sessionId.String()))
+func (s *authSession) GetAuthSession(sessionId uuid.UUID) (uuid.UUID, error) {
+	userIdBytes, err := s.sessionStore.Get(fmt.Sprintf("%s:%s", s.role, sessionId.String()))
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	sessionUuid, err := uuid.FromBytes(result)
+	userId, err := uuid.FromBytes(userIdBytes)
 	if err != nil {
 		return uuid.Nil, err
 	}
 
-	return sessionUuid, nil
+	return userId, nil
 }
 
 func (s *authSession) DeleteAuthSession(sessionId uuid.UUID) error {
