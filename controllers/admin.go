@@ -40,7 +40,7 @@ func (c *adminController) Login(ctx *fiber.Ctx) error {
 
 	adminAuth := models.AdminAuth{}
 
-	if err := c.service.AuthenticateByEmailAndPassword(adminLogin.Password.ToString(), adminLogin.Password.ToString(), &adminAuth); err != nil {
+	if err := c.service.AuthenticateByEmailAndPassword(adminLogin.Email.ToString(), adminLogin.Password.ToString(), &adminAuth); err != nil {
 		return err
 	}
 
@@ -105,13 +105,44 @@ func (c *adminController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (c *adminController) GetModerators(ctx *fiber.Ctx) error {
-	return nil
+	dtoModerators := new([]dto.AdminGetModerator)
+
+	if err := c.service.GetModerators(dtoModerators); err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(dtoModerators)
 }
 
 func (c *adminController) AddModerator(ctx *fiber.Ctx) error {
-	return nil
+	newModerator := new(dto.AdminCreateModerator)
+
+	if err := ctx.BodyParser(&newModerator); err != nil {
+		return err
+	}
+
+	if err := newModerator.Validate(); err != nil {
+		return err
+	}
+
+	err := c.service.CreateModerator(newModerator)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusCreated).JSON(nil)
 }
 
 func (c *adminController) DeleteModerator(ctx *fiber.Ctx) error {
-	return nil
+	moderatorId := new(dto.AdminDeleteModerator)
+
+	if err := ctx.BodyParser(&moderatorId); err != nil {
+		return err
+	}
+
+	if err := c.service.DeleteModerator(moderatorId.ModeratorId); err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(nil)
 }

@@ -92,4 +92,7 @@ func setUpAdminRoutes(router fiber.Router) {
 	adminRoute.Use(admin.VerifySession)
 	adminRoute.Post("/login", admin.Login)
 	adminRoute.Post("/logout", admin.Logout)
+	adminRoute.Get("get_moderators", admin.GetModerators)
+	adminRoute.Post("/create_moderator", admin.AddModerator)
+	adminRoute.Delete("/delete_moderator", admin.DeleteModerator)
 }
