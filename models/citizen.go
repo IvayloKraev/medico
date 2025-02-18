@@ -29,23 +29,23 @@ const (
 
 type CitizenAuth struct {
 	ID       uuid.UUID `gorm:"primary_key;unique;type:uuid;not null;"`
-	Email    Text      `gorm:"type:text;not null"`
-	Password Text      `gorm:"type:text;not null"`
+	Email    string    `gorm:"type:text;not null"`
+	Password string    `gorm:"type:text;not null"`
 	Citizen  Citizen   `gorm:"foreignKey:ID;references:ID;"`
 }
 
 type Citizen struct {
 	ID               uuid.UUID `gorm:"primaryKey;unique;type:uuid;not null;"`
-	FirstName        Text
-	SecondName       Text
-	Surname          Text
+	FirstName        string
+	SecondName       string
+	LastName         string
 	Birthday         DateTime
-	Sex              Sex  `gorm:"default:'male';type:enum('male','female');not null;"`
-	UCN              Text `gorm:"size:10"`
+	Sex              Sex    `gorm:"default:'male';type:enum('male','female');not null;"`
+	UCN              string `gorm:"size:10"`
 	Height           float32
 	Weight           float32
-	Email            Text
-	PhoneNumber      Text
+	Email            string
+	PhoneNumber      string
 	AddressID        uuid.UUID      `gorm:"type:uuid;not null"`
 	Address          CitizenAddress `gorm:"foreignKey:AddressID;references:ID;"`
 	PersonalDoctorID uuid.UUID      `gorm:"type:uuid;not null;"`
@@ -58,7 +58,7 @@ type CitizenAddress struct {
 	Province            Province     `gorm:"type:enum('varna')not null;"`
 	Municipality        Municipality `gorm:"type:enum('varna');not null;"`
 	City                City         `gorm:"type:enum('varna');not null;"`
-	NeighbourhoodStreet Text
+	NeighbourhoodStreet string
 	StreetUnitNumber    uint16
 	Entrance            uint8
 	Floor               uint8

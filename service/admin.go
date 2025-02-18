@@ -97,6 +97,7 @@ func (s *adminService) GetModerators(dtoModerators *[]dto.AdminGetModerator) err
 
 	for i, mod := range moderators {
 		(*dtoModerators)[i] = dto.AdminGetModerator{
+			ID:         mod.ID,
 			FirstName:  mod.FirstName,
 			SecondName: mod.SecondName,
 			LastName:   mod.LastName,

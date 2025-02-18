@@ -5,18 +5,31 @@ import (
 	"time"
 )
 
+type PharmacyOwnerAuth struct {
+	ID            uuid.UUID     `gorm:"primary_key;unique;type:uuid;not null"`
+	Email         string        `gorm:"type:text;not null"`
+	Password      string        `gorm:"type:text;not null"`
+	PharmacyOwner PharmacyOwner `gorm:"foreignKey:ID;references:ID;constraint:OnDelete:CASCADE;"`
+}
+
+type PharmacyOwner struct {
+	ID   uuid.UUID `gorm:"not null;primary_key;type:uuid;"`
+	Name string
+}
+
 type PharmacyBrand struct {
 	ID                  uuid.UUID `gorm:"not null;type:uuid;primary_key"`
-	Name                Text
-	Website             Text
-	Owner               Text
-	HeadquartersAddress Text
+	Name                string
+	Website             string
+	OwnerID             uuid.UUID     `gorm:"not null;type:uuid"`
+	Owner               PharmacyOwner `gorm:"foreignkey:OwnerID;references:ID"`
+	HeadquartersAddress string
 	PharmacyBranches    []PharmacyBranch `gorm:"foreignKey:PharmacyBrandID;"`
 }
 
 type PharmacyBranch struct {
 	ID                uuid.UUID `gorm:"not null;type:uuid;primary_key"`
-	Address           Text
+	Address           string
 	PharmacyBrandID   uuid.UUID     `gorm:"not null;type:uuid"`
 	PharmacyBrand     PharmacyBrand `gorm:"foreignKey:PharmacyBrandID;references:ID"`
 	Latitude          float32

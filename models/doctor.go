@@ -9,12 +9,20 @@ type Hospital struct {
 	Doctors []Doctor `gorm:"foreignKey:HospitalID"`
 }
 
+type DoctorAuth struct {
+	ID       uuid.UUID `gorm:"primary_key;unique;type:uuid;not null"`
+	Email    string    `gorm:"type:text;not null"`
+	Password string    `gorm:"type:text;not null"`
+	Doctor   Doctor    `gorm:"foreignKey:ID;references:ID;constraint:OnDelete:CASCADE;"`
+}
+
 type Doctor struct {
 	ID         uuid.UUID `gorm:"primaryKey;unique;type:uuid;not null"`
-	FirstName  Text
-	SecondName Text
-	Surname    Text
+	FirstName  string
+	SecondName string
+	LastName   string
 	HospitalID uuid.UUID `gorm:"type:uuid;not null"`
 	Hospital   Hospital  `gorm:"foreignKey:HospitalID"`
-	Uin        Text
+	UIN        string
+	Email      string
 }
