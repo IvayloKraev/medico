@@ -18,6 +18,7 @@ func SetUpRoutes(app *fiber.App) {
 
 	setUpCitizenRoute(apiRoute)
 	setUpAdminRoutes(apiRoute)
+	setUpModeratorRoutes(apiRoute)
 }
 
 func setUpCORS(router fiber.Router) {
@@ -92,7 +93,32 @@ func setUpAdminRoutes(router fiber.Router) {
 	adminRoute.Use(admin.VerifySession)
 	adminRoute.Post("/login", admin.Login)
 	adminRoute.Post("/logout", admin.Logout)
-	adminRoute.Get("get_moderators", admin.GetModerators)
+	adminRoute.Get("/get_moderators", admin.GetModerators)
 	adminRoute.Post("/create_moderator", admin.AddModerator)
 	adminRoute.Delete("/delete_moderator", admin.DeleteModerator)
+}
+
+func setUpModeratorRoutes(router fiber.Router) {
+	moderator := controllers.NewModeratorController()
+
+	moderatorRoute := router.Group("/moderator")
+	moderatorRoute.Use(moderator.VerifySession)
+	moderatorRoute.Post("/login", moderator.Login)
+	moderatorRoute.Post("/logout", moderator.Logout)
+
+	moderatorRoute.Get("/get_doctors", moderator.GetDoctors)
+	moderatorRoute.Post("/create_doctor", moderator.AddDoctor)
+	moderatorRoute.Delete("/delete_doctor", moderator.DeleteDoctor)
+
+	moderatorRoute.Get("/get_medicaments", moderator.GetMedicaments)
+	moderatorRoute.Post("/create_medicament", moderator.AddMedicament)
+	moderatorRoute.Delete("/delete_medicament", moderator.DeleteMedicament)
+
+	moderatorRoute.Get("/get_pharmacies", moderator.GetPharmacies)
+	moderatorRoute.Post("/create_pharmacy", moderator.AddPharmacy)
+	moderatorRoute.Delete("/delete_pharmacy", moderator.DeletePharmacy)
+
+	moderatorRoute.Get("/get_citizen", moderator.GetCitizens)
+	moderatorRoute.Post("/create_citizen", moderator.AddCitizen)
+	moderatorRoute.Delete("/delete_citizen", moderator.DeleteCitizen)
 }
