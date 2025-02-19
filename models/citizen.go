@@ -1,6 +1,9 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type Sex string
 
@@ -35,22 +38,22 @@ type CitizenAuth struct {
 }
 
 type Citizen struct {
-	ID               uuid.UUID `gorm:"primaryKey;unique;type:uuid;not null;"`
-	FirstName        string
-	SecondName       string
-	LastName         string
-	Birthday         DateTime
-	Sex              Sex    `gorm:"default:'male';type:enum('male','female');not null;"`
-	UCN              string `gorm:"size:10"`
-	Height           float32
-	Weight           float32
-	Email            string
-	PhoneNumber      string
-	AddressID        uuid.UUID      `gorm:"type:uuid;not null"`
-	Address          CitizenAddress `gorm:"foreignKey:AddressID;references:ID;"`
-	PersonalDoctorID uuid.UUID      `gorm:"type:uuid;not null;"`
-	PersonalDoctor   Doctor         `gorm:"foreignKey:PersonalDoctorID;references:ID;"`
-	Prescriptions    []Prescription `gorm:"foreignKey:CitizenID;"`
+	ID         uuid.UUID `gorm:"primaryKey;unique;type:uuid;not null;"`
+	FirstName  string
+	SecondName string
+	LastName   string
+	Birthday   time.Time
+	Sex        Sex    `gorm:"default:'male';type:enum('male','female');not null;"`
+	UCN        string `gorm:"size:10"`
+	//Height           float32
+	//Weight           float32
+	Email       string
+	PhoneNumber string
+	//AddressID        uuid.UUID      `gorm:"type:uuid;not null"`
+	//Address          CitizenAddress `gorm:"foreignKey:AddressID;references:ID;"`
+	//PersonalDoctorID uuid.UUID      `gorm:"type:uuid;not null;"`
+	//PersonalDoctor   Doctor         `gorm:"foreignKey:PersonalDoctorID;references:ID;"`
+	Prescriptions []Prescription `gorm:"foreignKey:CitizenID;"`
 }
 
 type CitizenAddress struct {
