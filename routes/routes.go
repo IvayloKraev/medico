@@ -10,18 +10,25 @@ import (
 	"strings"
 )
 
-func SetUpRoutes(app *fiber.App) {
+func SetupRoutes(app *fiber.App) {
 	apiRoute := app.Group("/api")
 
-	setUpCORS(apiRoute)
-	setUpCSRF(apiRoute)
+	setupCORS(apiRoute)
+	setupCSRF(apiRoute)
 
-	setUpCitizenRoute(apiRoute)
-	setUpAdminRoutes(apiRoute)
-	setUpModeratorRoutes(apiRoute)
+	setupAdminRoutes(apiRoute)
+
+	moderatorRoute := apiRoute.Group("/moderator")
+
+	setupDoctorModeratorRoutes(moderatorRoute)
+	setupPharmaModeratorRoutes(moderatorRoute)
+	setupMedicamentModeratorRoutes(moderatorRoute)
+	setupCitizenModeratorRoutes(moderatorRoute)
+
+	setupCitizenRoute(apiRoute)
 }
 
-func setUpCORS(router fiber.Router) {
+func setupCORS(router fiber.Router) {
 	allowedHeaders := []string{
 		fiber.HeaderContentType,
 		fiber.HeaderAuthorization,
@@ -53,7 +60,7 @@ func setUpCORS(router fiber.Router) {
 	}))
 }
 
-func setUpCSRF(router fiber.Router) {
+func setupCSRF(router fiber.Router) {
 	csrfConfig := config.LoadCSRFTokenConfig()
 
 	router.Use(csrf.New(csrf.Config{
@@ -75,18 +82,7 @@ func setUpCSRF(router fiber.Router) {
 	})
 }
 
-func setUpCitizenRoute(router fiber.Router) {
-	citizen := controllers.NewCitizenController()
-
-	citizenRoute := router.Group("/citizen")
-	citizenRoute.Use(citizen.VerifySession)
-	citizenRoute.Post("/login", citizen.Login)
-	citizenRoute.Post("/logout", citizen.Logout)
-	citizenRoute.Get("/prescriptions", citizen.Prescription)
-	citizenRoute.Get("/available_pharmacies", citizen.AvailablePharmacies)
-}
-
-func setUpAdminRoutes(router fiber.Router) {
+func setupAdminRoutes(router fiber.Router) {
 	admin := controllers.NewAdminController()
 
 	adminRoute := router.Group("/admin")
@@ -98,27 +94,67 @@ func setUpAdminRoutes(router fiber.Router) {
 	adminRoute.Delete("/delete_moderator", admin.DeleteModerator)
 }
 
-func setUpModeratorRoutes(router fiber.Router) {
-	moderator := controllers.NewModeratorController()
-
+func setupDoctorModeratorRoutes(router fiber.Router) {
 	moderatorRoute := router.Group("/moderator")
-	moderatorRoute.Use(moderator.VerifySession)
-	moderatorRoute.Post("/login", moderator.Login)
-	moderatorRoute.Post("/logout", moderator.Logout)
 
-	moderatorRoute.Get("/get_doctors", moderator.GetDoctors)
-	moderatorRoute.Post("/create_doctor", moderator.AddDoctor)
-	moderatorRoute.Delete("/delete_doctor", moderator.DeleteDoctor)
+	doctorModerator := controllers.NewDoctorModeratorController()
 
-	moderatorRoute.Get("/get_medicaments", moderator.GetMedicaments)
-	moderatorRoute.Post("/create_medicament", moderator.AddMedicament)
-	moderatorRoute.Delete("/delete_medicament", moderator.DeleteMedicament)
+	doctorModeratorRoute := moderatorRoute.Group("/doctor")
+	doctorModeratorRoute.Use(doctorModerator.VerifySession)
+	doctorModeratorRoute.Post("/login", doctorModerator.Login)
+	doctorModeratorRoute.Post("/logout", doctorModerator.Logout)
 
-	moderatorRoute.Get("/get_pharmacies", moderator.GetPharmacies)
-	moderatorRoute.Post("/create_pharmacy", moderator.AddPharmacy)
-	moderatorRoute.Delete("/delete_pharmacy", moderator.DeletePharmacy)
+	doctorModeratorRoute.Get("/get", doctorModerator.GetDoctors)
+	doctorModeratorRoute.Post("/create", doctorModerator.AddDoctor)
+	doctorModeratorRoute.Delete("/delete", doctorModerator.DeleteDoctor)
+}
 
-	moderatorRoute.Get("/get_citizens", moderator.GetCitizens)
-	moderatorRoute.Post("/create_citizen", moderator.AddCitizen)
-	moderatorRoute.Delete("/delete_citizen", moderator.DeleteCitizen)
+func setupPharmaModeratorRoutes(moderatorRoute fiber.Router) {
+	pharmaModerator := controllers.NewPharmaModeratorController()
+
+	pharmaModeratorRoute := moderatorRoute.Group("/pharma")
+	pharmaModeratorRoute.Use(pharmaModerator.VerifySession)
+	pharmaModeratorRoute.Post("/login", pharmaModerator.Login)
+	pharmaModeratorRoute.Post("/logout", pharmaModerator.Logout)
+
+	pharmaModeratorRoute.Get("/get", pharmaModerator.GetPharmacies)
+	pharmaModeratorRoute.Post("/create", pharmaModerator.AddPharmacy)
+	pharmaModeratorRoute.Delete("/delete", pharmaModerator.DeletePharmacy)
+}
+
+func setupMedicamentModeratorRoutes(moderatorRoute fiber.Router) {
+	medicamentModerator := controllers.NewMedicamentModeratorController()
+
+	medicamentModeratorRoute := moderatorRoute.Group("/medicament")
+	medicamentModeratorRoute.Use(medicamentModerator.VerifySession)
+	medicamentModeratorRoute.Post("/login", medicamentModerator.Login)
+	medicamentModeratorRoute.Post("/logout", medicamentModerator.Logout)
+
+	medicamentModeratorRoute.Get("/get_medicaments", medicamentModerator.GetMedicaments)
+	medicamentModeratorRoute.Post("/create_medicament", medicamentModerator.AddMedicament)
+	medicamentModeratorRoute.Delete("/delete_medicament", medicamentModerator.DeleteMedicament)
+}
+
+func setupCitizenModeratorRoutes(moderatorRoute fiber.Router) {
+	citizenModerator := controllers.NewCitizenModeratorController()
+
+	citizenModeratorRoute := moderatorRoute.Group("/citizen")
+	citizenModeratorRoute.Use(citizenModerator.VerifySession)
+	citizenModeratorRoute.Post("/login", citizenModerator.Login)
+	citizenModeratorRoute.Post("/logout", citizenModerator.Logout)
+
+	citizenModeratorRoute.Get("/get_citizens", citizenModerator.GetCitizens)
+	citizenModeratorRoute.Post("/create_citizen", citizenModerator.AddCitizen)
+	citizenModeratorRoute.Delete("/delete_citizen", citizenModerator.DeleteCitizen)
+}
+
+func setupCitizenRoute(router fiber.Router) {
+	citizen := controllers.NewCitizenController()
+
+	citizenRoute := router.Group("/citizen")
+	citizenRoute.Use(citizen.VerifySession)
+	citizenRoute.Post("/login", citizen.Login)
+	citizenRoute.Post("/logout", citizen.Logout)
+	citizenRoute.Get("/prescriptions", citizen.Prescription)
+	citizenRoute.Get("/available_pharmacies", citizen.AvailablePharmacies)
 }

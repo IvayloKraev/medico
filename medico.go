@@ -20,7 +20,7 @@ func main() {
 
 	medicoFiber := fiber.New()
 
-	routes.SetUpRoutes(medicoFiber)
+	routes.SetupRoutes(medicoFiber)
 
 	_ = medicoFiber.Listen(":8080")
 }
