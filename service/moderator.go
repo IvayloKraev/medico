@@ -187,6 +187,7 @@ func (m *pharmaModeratorService) CreatePharmacyAndOwner(createPharmacy *dto.Mode
 	}
 
 	newPharmacy := models.PharmacyBrand{
+		ID:      uuid.New(),
 		Name:    createPharmacy.Name,
 		OwnerID: newPharmacyOwnerAuth.ID,
 	}

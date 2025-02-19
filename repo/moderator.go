@@ -89,7 +89,7 @@ func (m *pharmaModeratorRepo) DeletePharmacy(pharmacyId uuid.UUID) error {
 	return m.repo.Where("id = ?", pharmacyId.String()).Delete(models.PharmacyBrand{}).Error
 }
 func (m *pharmaModeratorRepo) FindAllPharmacies(pharmacies *[]models.PharmacyBrand) error {
-	return m.repo.Find(pharmacies).Error
+	return m.repo.Preload("Owner").Find(pharmacies).Error
 }
 
 // MEDICAMENT

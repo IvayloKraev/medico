@@ -58,7 +58,7 @@ type ModeratorGetMedicaments struct {
 
 type ModeratorCreatePharmacy struct {
 	Name          string `json:"name"`
-	OwnerName     string `json:"pharmacy_owner"`
+	OwnerName     string `json:"owner_name"`
 	OwnerEmail    string `json:"owner_email"`
 	OwnerPassword string `json:"owner_password"`
 }

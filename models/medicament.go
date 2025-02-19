@@ -52,12 +52,12 @@ type Medicament struct {
 	BulgarianName  string
 	Description    string
 	//ActiveIngredients     []ActiveIngredientsMedicament `gorm:"many2many:active_ingredients_medicament;"`
-	ActiveIngredients     string
-	Application           MedicamentApplication `gorm:"type:enum('hard_tablets','soft_tables');"`
-	ApplicationQuantity   int
-	ApplicationUnit       Unit                `gorm:"foreignKey:UnitID;references:ID"`
-	AuthorizationHolderID uuid.UUID           `gorm:"not null;type:uuid"`
-	AuthorisationHolder   AuthorizationHolder `gorm:"foreignKey:AuthorizationHolderID;references:ID"`
-	ATC                   string
-	RequiredPrescription  bool
+	ActiveIngredients string
+	//Application           MedicamentApplication `gorm:"type:enum('hard_tablets','soft_tables');"`
+	ApplicationQuantity int
+	ApplicationUnit     Unit `gorm:"foreignKey:UnitID;references:ID"`
+	//AuthorizationHolderID uuid.UUID           `gorm:"not null;type:uuid"`
+	//AuthorisationHolder   AuthorizationHolder `gorm:"foreignKey:AuthorizationHolderID;references:ID"`
+	ATC                  string
+	RequiredPrescription bool
 }

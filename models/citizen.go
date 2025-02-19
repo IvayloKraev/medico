@@ -34,7 +34,7 @@ type CitizenAuth struct {
 	ID       uuid.UUID `gorm:"primary_key;unique;type:uuid;not null;"`
 	Email    string    `gorm:"type:text;not null"`
 	Password string    `gorm:"type:text;not null"`
-	Citizen  Citizen   `gorm:"foreignKey:ID;references:ID;"`
+	Citizen  Citizen   `gorm:"foreignKey:ID;references:ID;constraint:OnDelete:CASCADE;"`
 }
 
 type Citizen struct {

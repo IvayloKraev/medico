@@ -89,14 +89,12 @@ func setupAdminRoutes(router fiber.Router) {
 	adminRoute.Use(admin.VerifySession)
 	adminRoute.Post("/login", admin.Login)
 	adminRoute.Post("/logout", admin.Logout)
-	adminRoute.Get("/get_moderators", admin.GetModerators)
-	adminRoute.Post("/create_moderator", admin.AddModerator)
-	adminRoute.Delete("/delete_moderator", admin.DeleteModerator)
+	adminRoute.Get("/moderator/get", admin.GetModerators)
+	adminRoute.Post("/moderator/create", admin.AddModerator)
+	adminRoute.Delete("/moderator/delete", admin.DeleteModerator)
 }
 
-func setupDoctorModeratorRoutes(router fiber.Router) {
-	moderatorRoute := router.Group("/moderator")
-
+func setupDoctorModeratorRoutes(moderatorRoute fiber.Router) {
 	doctorModerator := controllers.NewDoctorModeratorController()
 
 	doctorModeratorRoute := moderatorRoute.Group("/doctor")
@@ -130,9 +128,9 @@ func setupMedicamentModeratorRoutes(moderatorRoute fiber.Router) {
 	medicamentModeratorRoute.Post("/login", medicamentModerator.Login)
 	medicamentModeratorRoute.Post("/logout", medicamentModerator.Logout)
 
-	medicamentModeratorRoute.Get("/get_medicaments", medicamentModerator.GetMedicaments)
-	medicamentModeratorRoute.Post("/create_medicament", medicamentModerator.AddMedicament)
-	medicamentModeratorRoute.Delete("/delete_medicament", medicamentModerator.DeleteMedicament)
+	medicamentModeratorRoute.Get("/get", medicamentModerator.GetMedicaments)
+	medicamentModeratorRoute.Post("/create", medicamentModerator.AddMedicament)
+	medicamentModeratorRoute.Delete("/delete", medicamentModerator.DeleteMedicament)
 }
 
 func setupCitizenModeratorRoutes(moderatorRoute fiber.Router) {
@@ -143,9 +141,9 @@ func setupCitizenModeratorRoutes(moderatorRoute fiber.Router) {
 	citizenModeratorRoute.Post("/login", citizenModerator.Login)
 	citizenModeratorRoute.Post("/logout", citizenModerator.Logout)
 
-	citizenModeratorRoute.Get("/get_citizens", citizenModerator.GetCitizens)
-	citizenModeratorRoute.Post("/create_citizen", citizenModerator.AddCitizen)
-	citizenModeratorRoute.Delete("/delete_citizen", citizenModerator.DeleteCitizen)
+	citizenModeratorRoute.Get("/get", citizenModerator.GetCitizens)
+	citizenModeratorRoute.Post("/create", citizenModerator.AddCitizen)
+	citizenModeratorRoute.Delete("/delete", citizenModerator.DeleteCitizen)
 }
 
 func setupCitizenRoute(router fiber.Router) {
