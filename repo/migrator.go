@@ -32,6 +32,12 @@ func (m migratorRepo) MigrateAll() error {
 		return err
 	}
 
+	if err := m.repo.DropTableIfExists(models.PharmacyOwnerAuth{}); err != nil {
+		return err
+	}
+	if err := m.repo.DropTableIfExists(models.PharmacyOwner{}); err != nil {
+		return err
+	}
 	if err := m.repo.DropTableIfExists(models.PharmacyBrand{}); err != nil {
 		return err
 	}
@@ -49,6 +55,9 @@ func (m migratorRepo) MigrateAll() error {
 		return err
 	}
 	if err := m.repo.DropTableIfExists(models.Doctor{}); err != nil {
+		return err
+	}
+	if err := m.repo.DropTableIfExists(models.DoctorAuth{}); err != nil {
 		return err
 	}
 
@@ -69,6 +78,17 @@ func (m migratorRepo) MigrateAll() error {
 		return err
 	}
 
+	if err := m.repo.DropTableIfExists(models.ModeratorAuth{}); err != nil {
+		return err
+	}
+	if err := m.repo.DropTableIfExists(models.Moderator{}); err != nil {
+		return err
+	}
+
+	if err := m.repo.DropTableIfExists(models.AdminAuth{}); err != nil {
+		return err
+	}
+
 	if err := m.repo.AutoMigrate(models.AuthorizationHolder{}); err != nil {
 		return err
 	}
@@ -82,6 +102,12 @@ func (m migratorRepo) MigrateAll() error {
 		return err
 	}
 
+	if err := m.repo.AutoMigrate(models.PharmacyOwnerAuth{}); err != nil {
+		return err
+	}
+	if err := m.repo.AutoMigrate(models.PharmacyOwner{}); err != nil {
+		return err
+	}
 	if err := m.repo.AutoMigrate(models.PharmacyBrand{}); err != nil {
 		return err
 	}
@@ -101,6 +127,9 @@ func (m migratorRepo) MigrateAll() error {
 	if err := m.repo.AutoMigrate(models.Doctor{}); err != nil {
 		return err
 	}
+	if err := m.repo.AutoMigrate(models.DoctorAuth{}); err != nil {
+		return err
+	}
 
 	if err := m.repo.AutoMigrate(models.Citizen{}); err != nil {
 		return err
@@ -116,6 +145,17 @@ func (m migratorRepo) MigrateAll() error {
 		return err
 	}
 	if err := m.repo.AutoMigrate(models.PrescriptionMedicament{}); err != nil {
+		return err
+	}
+
+	if err := m.repo.AutoMigrate(models.ModeratorAuth{}); err != nil {
+		return err
+	}
+	if err := m.repo.AutoMigrate(models.Moderator{}); err != nil {
+		return err
+	}
+
+	if err := m.repo.AutoMigrate(models.AdminAuth{}); err != nil {
 		return err
 	}
 

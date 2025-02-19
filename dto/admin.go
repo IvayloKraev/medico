@@ -37,6 +37,7 @@ type AdminDeleteModerator struct {
 }
 
 type AdminGetModerator struct {
+	ID         uuid.UUID            `json:"id"`
 	FirstName  string               `json:"first_name"`
 	SecondName string               `json:"second_name"`
 	LastName   string               `json:"last_name"`
