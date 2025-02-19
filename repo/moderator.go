@@ -6,98 +6,166 @@ import (
 	"medico/models"
 )
 
-type ModeratorRepo interface {
+// DOCTOR
+
+type DoctorModeratorRepo interface {
 	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
 	FindById(id uuid.UUID, moderator *models.Moderator) error
 
 	CreateDoctor(doctorAuth *models.DoctorAuth) error
 	DeleteDoctor(doctorId uuid.UUID) error
 	FindAllDoctors(doctors *[]models.Doctor) error
+}
 
-	CreateMedicament(medicament *models.Medicament) error
-	DeleteMedicament(medicamentId uuid.UUID) error
-	FindAllMedicaments(medicaments *[]models.Medicament) error
+type doctorModeratorRepo struct {
+	repo Repository
+}
+
+func NewDoctorModeratorRepo() DoctorModeratorRepo {
+	databaseConfig := config.LoadDatabaseConfig()
+	return &doctorModeratorRepo{
+		repo: CreateNewRepository(databaseConfig),
+	}
+}
+
+func (m *doctorModeratorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
+	return m.repo.First(moderator, "email = ?", email).Error
+}
+func (m *doctorModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
+	return m.repo.First(&moderator, "id = ? AND type = ?", id, models.DoctorMod).Error
+}
+
+func (m *doctorModeratorRepo) CreateDoctor(doctorAuth *models.DoctorAuth) error {
+	return m.repo.Create(doctorAuth).Error
+}
+func (m *doctorModeratorRepo) DeleteDoctor(doctorId uuid.UUID) error {
+	return m.repo.Where("id = ?", doctorId.String()).Delete(models.DoctorAuth{}).Error
+}
+func (m *doctorModeratorRepo) FindAllDoctors(doctors *[]models.Doctor) error {
+	return m.repo.Find(doctors).Error
+}
+
+// PHARMA
+
+type PharmaModeratorRepo interface {
+	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
+	FindById(id uuid.UUID, moderator *models.Moderator) error
 
 	CreatePharmacyOwner(owner *models.PharmacyOwnerAuth) error
 	CreatePharmacy(pharmacy *models.PharmacyBrand) error
 	DeletePharmacyOwner(pharmacyOwnerId uuid.UUID) error
 	DeletePharmacy(pharmacyId uuid.UUID) error
 	FindAllPharmacies(pharmacies *[]models.PharmacyBrand) error
+}
+
+type pharmaModeratorRepo struct {
+	repo Repository
+}
+
+func NewPharmaModeratorRepo() PharmaModeratorRepo {
+	databaseConfig := config.LoadDatabaseConfig()
+	return &pharmaModeratorRepo{
+		repo: CreateNewRepository(databaseConfig),
+	}
+}
+
+func (m *pharmaModeratorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
+	return m.repo.First(moderator, "email = ?", email).Error
+}
+func (m *pharmaModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
+	return m.repo.First(&moderator, "id = ? AND type = ?", id, models.PharmacyMod).Error
+}
+
+func (m *pharmaModeratorRepo) CreatePharmacyOwner(owner *models.PharmacyOwnerAuth) error {
+	return m.repo.Create(owner).Error
+}
+func (m *pharmaModeratorRepo) CreatePharmacy(pharmacy *models.PharmacyBrand) error {
+	return m.repo.Create(pharmacy).Error
+}
+func (m *pharmaModeratorRepo) DeletePharmacyOwner(pharmacyOwnerId uuid.UUID) error {
+	return m.repo.Where("id = ?", pharmacyOwnerId.String()).Delete(models.PharmacyOwner{}).Error
+}
+func (m *pharmaModeratorRepo) DeletePharmacy(pharmacyId uuid.UUID) error {
+	return m.repo.Where("id = ?", pharmacyId.String()).Delete(models.PharmacyBrand{}).Error
+}
+func (m *pharmaModeratorRepo) FindAllPharmacies(pharmacies *[]models.PharmacyBrand) error {
+	return m.repo.Find(pharmacies).Error
+}
+
+// MEDICAMENT
+
+type MedicamentModeratorRepo interface {
+	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
+	FindById(id uuid.UUID, moderator *models.Moderator) error
+
+	CreateMedicament(medicament *models.Medicament) error
+	DeleteMedicament(medicamentId uuid.UUID) error
+	FindAllMedicaments(medicaments *[]models.Medicament) error
+}
+
+type medicamentModeratorRepo struct {
+	repo Repository
+}
+
+func NewMedicamentModeratorRepo() MedicamentModeratorRepo {
+	databaseConfig := config.LoadDatabaseConfig()
+	return &medicamentModeratorRepo{
+		repo: CreateNewRepository(databaseConfig),
+	}
+}
+
+func (m *medicamentModeratorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
+	return m.repo.First(moderator, "email = ?", email).Error
+}
+func (m *medicamentModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
+	return m.repo.First(&moderator, "id = ? AND type = ?", id, models.MedicamentMod).Error
+}
+
+func (m *medicamentModeratorRepo) CreateMedicament(medicament *models.Medicament) error {
+	return m.repo.Create(medicament).Error
+}
+func (m *medicamentModeratorRepo) DeleteMedicament(medicamentId uuid.UUID) error {
+	return m.repo.Where("id = ?", medicamentId.String()).Delete(models.Medicament{}).Error
+}
+func (m *medicamentModeratorRepo) FindAllMedicaments(medicaments *[]models.Medicament) error {
+	return m.repo.Find(medicaments).Error
+}
+
+// CITIZEN
+
+type CitizenModeratorRepo interface {
+	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
+	FindById(id uuid.UUID, moderator *models.Moderator) error
 
 	CreateCitizen(citizenAuth *models.CitizenAuth) error
 	DeleteCitizen(citizenId uuid.UUID) error
 	FindAllCitizens(citizens *[]models.Citizen) error
 }
 
-type moderatorRepo struct {
+type citizenModeratorRepo struct {
 	repo Repository
 }
 
-func NewModeratorRepo() ModeratorRepo {
+func NewCitizenModeratorRepo() CitizenModeratorRepo {
 	databaseConfig := config.LoadDatabaseConfig()
-	return &moderatorRepo{repo: CreateNewRepository(databaseConfig)}
+	return &citizenModeratorRepo{
+		repo: CreateNewRepository(databaseConfig),
+	}
 }
 
-func (m *moderatorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
+func (m *citizenModeratorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
 	return m.repo.First(moderator, "email = ?", email).Error
 }
-
-func (m *moderatorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
-	return m.repo.First(&moderator, "id = ?", id).Error
+func (m *citizenModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
+	return m.repo.First(&moderator, "id = ? AND type = ?", id, models.CitizenMod).Error
 }
 
-func (m *moderatorRepo) CreateDoctor(doctorAuth *models.DoctorAuth) error {
-	return m.repo.Create(doctorAuth).Error
-}
-
-func (m *moderatorRepo) DeleteDoctor(doctorId uuid.UUID) error {
-	return m.repo.Where("id = ?", doctorId.String()).Delete(models.DoctorAuth{}).Error
-}
-
-func (m *moderatorRepo) FindAllDoctors(doctors *[]models.Doctor) error {
-	return m.repo.Find(doctors).Error
-}
-
-func (m *moderatorRepo) CreateMedicament(medicament *models.Medicament) error {
-	return m.repo.Create(medicament).Error
-}
-
-func (m *moderatorRepo) DeleteMedicament(medicamentId uuid.UUID) error {
-	return m.repo.Where("id = ?", medicamentId.String()).Delete(models.Medicament{}).Error
-}
-
-func (m *moderatorRepo) FindAllMedicaments(medicaments *[]models.Medicament) error {
-	return m.repo.Find(medicaments).Error
-}
-
-func (m *moderatorRepo) CreatePharmacyOwner(owner *models.PharmacyOwnerAuth) error {
-	return m.repo.Create(owner).Error
-}
-
-func (m *moderatorRepo) CreatePharmacy(pharmacy *models.PharmacyBrand) error {
-	return m.repo.Create(pharmacy).Error
-}
-
-func (m *moderatorRepo) DeletePharmacyOwner(pharmacyOwnerId uuid.UUID) error {
-	return m.repo.Where("id = ?", pharmacyOwnerId.String()).Delete(models.PharmacyOwner{}).Error
-}
-
-func (m *moderatorRepo) DeletePharmacy(pharmacyId uuid.UUID) error {
-	return m.repo.Where("id = ?", pharmacyId.String()).Delete(models.PharmacyBrand{}).Error
-}
-
-func (m *moderatorRepo) FindAllPharmacies(pharmacies *[]models.PharmacyBrand) error {
-	return m.repo.Find(pharmacies).Error
-}
-
-func (m *moderatorRepo) CreateCitizen(citizenAuth *models.CitizenAuth) error {
+func (m *citizenModeratorRepo) CreateCitizen(citizenAuth *models.CitizenAuth) error {
 	return m.repo.Create(citizenAuth).Error
 }
-
-func (m *moderatorRepo) DeleteCitizen(doctorId uuid.UUID) error {
+func (m *citizenModeratorRepo) DeleteCitizen(doctorId uuid.UUID) error {
 	return m.repo.Where("id = ?", doctorId.String()).Delete(models.CitizenAuth{}).Error
 }
-
-func (m *moderatorRepo) FindAllCitizens(citizens *[]models.Citizen) error {
+func (m *citizenModeratorRepo) FindAllCitizens(citizens *[]models.Citizen) error {
 	return m.repo.Find(citizens).Error
 }
