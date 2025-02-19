@@ -7,7 +7,8 @@ import (
 )
 
 type ModeratorRepo interface {
-	FindAuthByEmail(email string, moderatorAuth *models.ModeratorAuth) error
+	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
+	FindById(id uuid.UUID, moderator *models.Moderator) error
 
 	CreateDoctor(doctorAuth *models.DoctorAuth) error
 	DeleteDoctor(doctorId uuid.UUID) error
@@ -37,8 +38,12 @@ func NewModeratorRepo() ModeratorRepo {
 	return &moderatorRepo{repo: CreateNewRepository(databaseConfig)}
 }
 
-func (m *moderatorRepo) FindAuthByEmail(email string, auth *models.ModeratorAuth) error {
-	return m.repo.First(&auth, "email = ?", email).Error
+func (m *moderatorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
+	return m.repo.First(moderator, "email = ?", email).Error
+}
+
+func (m *moderatorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
+	return m.repo.First(&moderator, "id = ?", id).Error
 }
 
 func (m *moderatorRepo) CreateDoctor(doctorAuth *models.DoctorAuth) error {

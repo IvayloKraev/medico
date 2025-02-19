@@ -7,6 +7,7 @@ import (
 	"medico/dto"
 	"medico/models"
 	"medico/service"
+	"regexp"
 	"time"
 )
 
@@ -47,17 +48,17 @@ func (m *moderatorController) Login(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	if err := moderatorLogin.Validate(); err != nil {
+	moderatorId := uuid.UUID{}
+	if err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email.ToString(), moderatorLogin.Password.ToString(), &moderatorId); err != nil {
 		return err
 	}
 
-	moderatorAuth := models.ModeratorAuth{}
-
-	if err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email.ToString(), moderatorLogin.Password.ToString(), &moderatorAuth); err != nil {
+	moderator := models.Moderator{}
+	if err := m.service.GetModeratorDetails(moderatorId, &moderator); err != nil {
 		return err
 	}
 
-	session, expiry, err := m.service.CreateAuthenticationSession(moderatorAuth.ID, moderatorAuth.Moderator.Type)
+	session, expiry, err := m.service.CreateAuthenticationSession(moderatorId, moderator.Type)
 	if err != nil {
 		return err
 	}
@@ -70,11 +71,11 @@ func (m *moderatorController) Login(ctx *fiber.Ctx) error {
 
 	ctx.Cookie(&fiber.Cookie{
 		Name:    "moderator_type",
-		Value:   string(moderatorAuth.Moderator.Type),
+		Value:   string(moderator.Type),
 		Expires: time.Now().Add(expiry),
 	})
 
-	return fiber.ErrNotImplemented
+	return ctx.Status(fiber.StatusOK).JSON(nil)
 }
 
 func (m *moderatorController) Logout(ctx *fiber.Ctx) error {
@@ -120,18 +121,44 @@ func (m *moderatorController) VerifySession(ctx *fiber.Ctx) error {
 		return errors.New("not logged in")
 	}
 
-	moderatorType := models.ModeratorType(ctx.Cookies("moderator_type", ""))
-
-	if moderatorType == "" {
-		return errors.New("wrong type")
-	}
-
-	adminId, err := m.service.GetAuthenticationSession(sessionId, moderatorType)
+	moderatorType, err := models.ModeratorTypeFromText(ctx.Cookies("moderator_type", ""))
 	if err != nil {
 		return err
 	}
 
-	ctx.Locals("moderatorId", adminId)
+	moderatorId, err := m.service.GetAuthenticationSession(sessionId, moderatorType)
+	if err != nil {
+		return err
+	}
+
+	doctorPathRegex, err := regexp.Compile(`/api/moderator/[a-z]+_doctors?`)
+	if err != nil {
+		return err
+	}
+
+	pharmaPathRegex, err := regexp.Compile(`/api/moderator/[a-z]+_pharmac(ies|y)`)
+	if err != nil {
+		return err
+	}
+
+	citizenPathRegex, err := regexp.Compile(`/api/moderator/[a-z]+_citizens?`)
+	if err != nil {
+		return err
+	}
+
+	medicamentPathRegex, err := regexp.Compile(`/api/moderator/[a-z]+_medicaments?`)
+	if err != nil {
+		return err
+	}
+
+	if !(doctorPathRegex.MatchString(ctx.Path()) && moderatorType == models.DoctorMod) &&
+		!(pharmaPathRegex.MatchString(ctx.Path()) && moderatorType == models.PharmacyMod) &&
+		!(citizenPathRegex.MatchString(ctx.Path()) && moderatorType == models.CitizenMod) &&
+		!(medicamentPathRegex.MatchString(ctx.Path()) && moderatorType == models.MedicamentMod) {
+		return errors.New("mismatched role")
+	}
+
+	ctx.Locals("moderatorId", moderatorId)
 
 	return ctx.Next()
 }

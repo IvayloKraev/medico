@@ -13,7 +13,8 @@ import (
 )
 
 type ModeratorService interface {
-	AuthenticateWithEmailAndPassword(email, password string, moderatorAuth *models.ModeratorAuth) error
+	AuthenticateWithEmailAndPassword(email, password string, moderatorId *uuid.UUID) error
+	GetModeratorDetails(moderatorID uuid.UUID, moderator *models.Moderator) error
 
 	CreateAuthenticationSession(moderatorId uuid.UUID, moderatorType models.ModeratorType) (uuid.UUID, time.Duration, error)
 	GetAuthenticationSession(sessionID uuid.UUID, moderatorType models.ModeratorType) (uuid.UUID, error)
@@ -54,8 +55,10 @@ func NewModeratorService() ModeratorService {
 	}
 }
 
-func (m *moderatorService) AuthenticateWithEmailAndPassword(email, password string, moderatorAuth *models.ModeratorAuth) error {
-	if err := m.repo.FindAuthByEmail(email, moderatorAuth); err != nil {
+func (m *moderatorService) AuthenticateWithEmailAndPassword(email, password string, moderatorID *uuid.UUID) error {
+	moderatorAuth := models.ModeratorAuth{}
+
+	if err := m.repo.FindAuthByEmail(email, &moderatorAuth); err != nil {
 		return err
 	}
 
@@ -63,7 +66,12 @@ func (m *moderatorService) AuthenticateWithEmailAndPassword(email, password stri
 		return err
 	}
 
+	*moderatorID = moderatorAuth.ID
+
 	return nil
+}
+func (m *moderatorService) GetModeratorDetails(moderatorID uuid.UUID, moderator *models.Moderator) error {
+	return m.repo.FindById(moderatorID, moderator)
 }
 
 func (m *moderatorService) CreateAuthenticationSession(moderatorId uuid.UUID, moderatorType models.ModeratorType) (uuid.UUID, time.Duration, error) {

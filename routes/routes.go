@@ -118,7 +118,7 @@ func setUpModeratorRoutes(router fiber.Router) {
 	moderatorRoute.Post("/create_pharmacy", moderator.AddPharmacy)
 	moderatorRoute.Delete("/delete_pharmacy", moderator.DeletePharmacy)
 
-	moderatorRoute.Get("/get_citizen", moderator.GetCitizens)
+	moderatorRoute.Get("/get_citizens", moderator.GetCitizens)
 	moderatorRoute.Post("/create_citizen", moderator.AddCitizen)
 	moderatorRoute.Delete("/delete_citizen", moderator.DeleteCitizen)
 }
