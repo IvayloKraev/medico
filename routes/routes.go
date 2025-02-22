@@ -25,6 +25,8 @@ func SetupRoutes(app *fiber.App) {
 	setupMedicamentModeratorRoutes(moderatorRoute)
 	setupCitizenModeratorRoutes(moderatorRoute)
 
+	setupDoctorRoutes(apiRoute)
+
 	setupCitizenRoute(apiRoute)
 }
 
@@ -144,6 +146,19 @@ func setupCitizenModeratorRoutes(moderatorRoute fiber.Router) {
 	citizenModeratorRoute.Get("/get", citizenModerator.GetCitizens)
 	citizenModeratorRoute.Post("/create", citizenModerator.AddCitizen)
 	citizenModeratorRoute.Delete("/delete", citizenModerator.DeleteCitizen)
+}
+
+func setupDoctorRoutes(route fiber.Router) {
+	doctor := controllers.NewDoctorController()
+
+	doctorRoute := route.Group("/doctor")
+	doctorRoute.Use(doctor.VerifySession)
+	doctorRoute.Post("/login", doctor.Login)
+	doctorRoute.Post("/logout", doctor.Logout)
+
+	doctorRoute.Get("/citizen/info", doctor.GetCitizenInfo)
+	doctorRoute.Get("/citizen/prescription", doctor.GetCitizenPrescriptions)
+	doctorRoute.Post("/citizen/prescription", doctor.CreateCitizenPrescription)
 }
 
 func setupCitizenRoute(router fiber.Router) {

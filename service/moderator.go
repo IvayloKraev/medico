@@ -380,11 +380,12 @@ func (m *citizenModeratorService) CreateCitizen(createCitizen *dto.ModeratorCrea
 		Email:    createCitizen.Email,
 		Password: string(password),
 		Citizen: models.Citizen{
-			FirstName:  createCitizen.FirstName,
-			SecondName: createCitizen.SecondName,
-			LastName:   createCitizen.LastName,
-			UCN:        createCitizen.UCN,
-			Email:      createCitizen.Email,
+			FirstName:        createCitizen.FirstName,
+			SecondName:       createCitizen.SecondName,
+			LastName:         createCitizen.LastName,
+			UCN:              createCitizen.UCN,
+			Email:            createCitizen.Email,
+			PersonalDoctorID: createCitizen.PersonalDoctorId,
 		},
 	}
 

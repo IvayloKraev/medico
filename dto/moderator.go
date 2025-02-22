@@ -72,12 +72,13 @@ type ModeratorGetPharmacies struct {
 }
 
 type ModeratorCreateCitizen struct {
-	FirstName  string `json:"first_name"`
-	SecondName string `json:"second_name"`
-	LastName   string `json:"last_name"`
-	UCN        string `json:"ucn"`
-	Email      string `json:"email"`
-	Password   string `json:"password"`
+	FirstName        string    `json:"first_name"`
+	SecondName       string    `json:"second_name"`
+	LastName         string    `json:"last_name"`
+	UCN              string    `json:"ucn"`
+	Email            string    `json:"email"`
+	Password         string    `json:"password"`
+	PersonalDoctorId uuid.UUID `json:"personal_doctor_id"`
 }
 type ModeratorDeleteCitizen struct {
 	CitizenId uuid.UUID `json:"citizen_id"`

@@ -51,9 +51,9 @@ type Citizen struct {
 	PhoneNumber string
 	//AddressID        uuid.UUID      `gorm:"type:uuid;not null"`
 	//Address          CitizenAddress `gorm:"foreignKey:AddressID;references:ID;"`
-	//PersonalDoctorID uuid.UUID      `gorm:"type:uuid;not null;"`
-	//PersonalDoctor   Doctor         `gorm:"foreignKey:PersonalDoctorID;references:ID;"`
-	Prescriptions []Prescription `gorm:"foreignKey:CitizenID;"`
+	PersonalDoctorID uuid.UUID      `gorm:"type:uuid;not null;"`
+	PersonalDoctor   Doctor         `gorm:"foreignKey:PersonalDoctorID;references:ID;"`
+	Prescriptions    []Prescription `gorm:"foreignKey:CitizenID;"`
 }
 
 type CitizenAddress struct {
