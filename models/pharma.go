@@ -29,6 +29,7 @@ type PharmacyBrand struct {
 
 type PharmacyBranch struct {
 	ID                uuid.UUID `gorm:"not null;type:uuid;primary_key"`
+	Name              string
 	Address           string
 	PharmacyBrandID   uuid.UUID     `gorm:"not null;type:uuid"`
 	PharmacyBrand     PharmacyBrand `gorm:"foreignKey:PharmacyBrandID;references:ID"`
@@ -46,14 +47,21 @@ type PharmacyBranchStorage struct {
 	PharmacyBranchID uuid.UUID  `gorm:"not null;type:uuid"`
 	MedicamentID     uuid.UUID  `gorm:"not null;type:uuid"`
 	Medicament       Medicament `gorm:"foreignKey:MedicamentID;references:ID"`
-	Quantity         WholeQuantity
+	Quantity         uint
+}
+
+type PharmacistAuth struct {
+	ID         uuid.UUID  `gorm:"not null;primary_key;type:uuid;"`
+	Email      string     `gorm:"type:text;not null"`
+	Password   string     `gorm:"type:text;not null"`
+	Pharmacist Pharmacist `gorm:"foreignKey:ID;references:ID;constraint:OnDelete:CASCADE;"`
 }
 
 type Pharmacist struct {
 	ID               uuid.UUID `gorm:"not null;type:uuid;primary_key"`
-	FirstName        Text
-	SecondName       Text
-	Surname          Text
+	FirstName        string
+	SecondName       string
+	Surname          string
 	PharmacyBranchID uuid.UUID      `gorm:"not null;type:uuid"`
 	PharmacyBranch   PharmacyBranch `gorm:"foreignKey:PharmacyBranchID;"`
 }
