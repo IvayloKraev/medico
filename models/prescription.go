@@ -1,6 +1,9 @@
 package models
 
-import "github.com/google/uuid"
+import (
+	"github.com/google/uuid"
+	"time"
+)
 
 type PrescriptionState string
 
@@ -17,10 +20,10 @@ type Prescription struct {
 	CitizenID    uuid.UUID                `gorm:"type:uuid;not null"`
 	Medicaments  []PrescriptionMedicament `gorm:"foreignKey:PrescriptionID"`
 	State        PrescriptionState        `gorm:"type:enum('active','fulfilled','invalid'); not null"`
-	Name         Text
-	CreationDate DateTime `gorm:"not null"`
-	StartDate    DateTime `gorm:"not null"`
-	EndDate      DateTime `gorm:"not null"`
+	Name         string
+	CreationDate time.Time `gorm:"not null"`
+	StartDate    time.Time `gorm:"not null"`
+	EndDate      time.Time `gorm:"not null"`
 }
 
 type PrescriptionMedicament struct {

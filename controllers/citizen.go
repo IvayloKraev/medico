@@ -5,26 +5,27 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"medico/dto"
+	"medico/models"
 	"medico/service"
 	"time"
 )
 
 type CitizenController interface {
-	Login(c *fiber.Ctx) error
-	Logout(c *fiber.Ctx) error
-	VerifySession(c *fiber.Ctx) error
-	Prescription(c *fiber.Ctx) error
-	AvailablePharmacies(c *fiber.Ctx) error
+	Login(ctx *fiber.Ctx) error
+	Logout(ctx *fiber.Ctx) error
+	VerifySession(ctx *fiber.Ctx) error
+	GetMedicalInfo(ctx *fiber.Ctx) error
+	Prescription(ctx *fiber.Ctx) error
+	AvailablePharmacies(ctx *fiber.Ctx) error
 }
 
 type citizenController struct {
-	Path    string
 	service service.CitizenService
 }
 
 // NewCitizenController is constructor for CitizenController
 func NewCitizenController() CitizenController {
-	return &citizenController{Path: "/citizen", service: service.NewCitizenService()}
+	return &citizenController{service: service.NewCitizenService()}
 }
 
 func (c *citizenController) Login(ctx *fiber.Ctx) error {
@@ -38,12 +39,13 @@ func (c *citizenController) Login(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	err, m := c.service.AuthenticateByEmailAndPassword(loginData.Email.ToString(), loginData.Password.ToString())
-	if err != nil {
+	citizenAuth := models.CitizenAuth{}
+
+	if err := c.service.AuthenticateByEmailAndPassword(loginData.Email.ToString(), loginData.Password.ToString(), &citizenAuth); err != nil {
 		return err
 	}
 
-	session, expiry, err := c.service.CreateAuthenticateSession(m.ID)
+	session, expiry, err := c.service.CreateAuthenticationSession(citizenAuth.ID)
 
 	if err != nil {
 		return err
@@ -68,7 +70,7 @@ func (c *citizenController) Logout(ctx *fiber.Ctx) error {
 		return errors.New("not logged in")
 	}
 
-	if err := c.service.DeleteAuthenticateSession(sessionId); err != nil {
+	if err := c.service.DeleteAuthenticationSession(sessionId); err != nil {
 		return err
 	}
 
@@ -94,7 +96,7 @@ func (c *citizenController) VerifySession(ctx *fiber.Ctx) error {
 		return errors.New("not logged in")
 	}
 
-	userId, err := c.service.VerifyAuthenticateSession(sessionId)
+	userId, err := c.service.GetAuthenticationSession(sessionId)
 	if err != nil {
 		return err
 	}
@@ -102,6 +104,11 @@ func (c *citizenController) VerifySession(ctx *fiber.Ctx) error {
 	ctx.Locals("citizenId", userId)
 
 	return ctx.Next()
+}
+
+func (c *citizenController) GetMedicalInfo(ctx *fiber.Ctx) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (c *citizenController) Prescription(ctx *fiber.Ctx) error {

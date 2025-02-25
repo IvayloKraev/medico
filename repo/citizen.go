@@ -1,12 +1,16 @@
 package repo
 
 import (
+	"github.com/google/uuid"
 	"medico/config"
 	"medico/models"
 )
 
 type CitizenRepo interface {
-	FindAuthByEmail(email string) (models.CitizenAuth, error)
+	FindAuthByEmail(email string, citizenAuth *models.CitizenAuth) error
+	FindMedicalInfo(citizenId uuid.UUID, citizen *models.Citizen) error
+	FindAllPrescriptions(citizenId uuid.UUID, prescriptions *[]models.Prescription) error
+	FindAvailablePharmacies(prescriptionId uuid.UUID, branches *[]models.PharmacyBranch) error
 }
 
 type citizenRepo struct {
@@ -18,8 +22,22 @@ func NewCitizenRepo() CitizenRepo {
 	return &citizenRepo{repo: CreateNewRepository(databaseConfig)}
 }
 
-func (c *citizenRepo) FindAuthByEmail(email string) (models.CitizenAuth, error) {
-	citizenAuth := models.CitizenAuth{}
-	err := c.repo.First(&citizenAuth, "email = ?", email).Error
-	return citizenAuth, err
+func (c *citizenRepo) FindAuthByEmail(email string, citizenAuth *models.CitizenAuth) error {
+	return c.repo.First(citizenAuth, "email = ?", email).Error
+}
+
+func (c *citizenRepo) FindMedicalInfo(citizenId uuid.UUID, citizen *models.Citizen) error {
+	return c.repo.Preload("PersonalDoctor").First(citizen, "id = ?", citizenId).Error
+}
+
+func (c *citizenRepo) FindAllPrescriptions(citizenId uuid.UUID, prescriptions *[]models.Prescription) error {
+	return c.repo.Preload("Doctor").Preload("Medicaments.Medicament").Find(prescriptions, "citizen_id = ?", citizenId).Error
+}
+
+func (c *citizenRepo) FindAvailablePharmacies(prescriptionId uuid.UUID, branches *[]models.PharmacyBranch) error {
+	return c.repo.Model(models.PharmacyBranchStorage{}).
+		Joins("LEFT JOIN pharmacy_branch ON pharmacy_branch.id = pharmacy_branch_storage.pharmacy_branch_id").
+		Joins("LEFT JOIN prescription_medicament ON pharmacy_branch_storage.medicament_id = prescription_medicament.medicament_id AND prescription_medicament.prescription_id = ?", prescriptionId).
+		Where("pharmacy_branch_storage.quantity > prescription_medicament.quantity").
+		Find(branches).Error
 }
