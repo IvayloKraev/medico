@@ -11,21 +11,21 @@ import (
 )
 
 type CitizenController interface {
-	Login(c *fiber.Ctx) error
-	Logout(c *fiber.Ctx) error
-	VerifySession(c *fiber.Ctx) error
-	Prescription(c *fiber.Ctx) error
-	AvailablePharmacies(c *fiber.Ctx) error
+	Login(ctx *fiber.Ctx) error
+	Logout(ctx *fiber.Ctx) error
+	VerifySession(ctx *fiber.Ctx) error
+	GetMedicalInfo(ctx *fiber.Ctx) error
+	Prescription(ctx *fiber.Ctx) error
+	AvailablePharmacies(ctx *fiber.Ctx) error
 }
 
 type citizenController struct {
-	Path    string
 	service service.CitizenService
 }
 
 // NewCitizenController is constructor for CitizenController
 func NewCitizenController() CitizenController {
-	return &citizenController{Path: "/citizen", service: service.NewCitizenService()}
+	return &citizenController{service: service.NewCitizenService()}
 }
 
 func (c *citizenController) Login(ctx *fiber.Ctx) error {
@@ -104,6 +104,11 @@ func (c *citizenController) VerifySession(ctx *fiber.Ctx) error {
 	ctx.Locals("citizenId", userId)
 
 	return ctx.Next()
+}
+
+func (c *citizenController) GetMedicalInfo(ctx *fiber.Ctx) error {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (c *citizenController) Prescription(ctx *fiber.Ctx) error {
