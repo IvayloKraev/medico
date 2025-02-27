@@ -31,7 +31,7 @@ func NewDoctorController() DoctorController {
 }
 
 func (d doctorController) Login(ctx *fiber.Ctx) error {
-	doctorLogin := new(dto.DoctorLogin)
+	doctorLogin := new(dto.RequestDoctorLogin)
 
 	if err := ctx.BodyParser(&doctorLogin); err != nil {
 		return err
@@ -111,7 +111,7 @@ func (d doctorController) GetCitizenInfo(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	citizenInfoDto := new(dto.DoctorCitizenInfo)
+	citizenInfoDto := new(dto.ResponseDoctorCitizenInfo)
 
 	if err := d.service.GetCitizenInfo(ctx.Locals("doctorId").(uuid.UUID), citizenUcnDto.CitizenUcn, citizenInfoDto); err != nil {
 		return err
@@ -127,7 +127,7 @@ func (d doctorController) GetCitizenPrescriptions(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	citizenPrescriptionDto := new([]dto.DoctorGetCitizenPrescriptionResponse)
+	citizenPrescriptionDto := new([]dto.ResponseDoctorGetCitizenPrescriptionResponse)
 
 	if err := d.service.GetCitizensPrescriptions(ctx.Locals("doctorId").(uuid.UUID), citizenIdDto.CitizenId, citizenPrescriptionDto); err != nil {
 		return err
@@ -137,7 +137,7 @@ func (d doctorController) GetCitizenPrescriptions(ctx *fiber.Ctx) error {
 }
 
 func (d doctorController) CreateCitizenPrescription(ctx *fiber.Ctx) error {
-	citizenPrescriptionDto := new(dto.DoctorCreatePrescription)
+	citizenPrescriptionDto := new(dto.RequestDoctorCreatePrescription)
 
 	if err := ctx.BodyParser(&citizenPrescriptionDto); err != nil {
 		return err
