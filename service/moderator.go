@@ -81,6 +81,7 @@ func (m *doctorModeratorService) CreateDoctor(createDoctor *dto.RequestModerator
 			SecondName: createDoctor.SecondName,
 			LastName:   createDoctor.LastName,
 			UIN:        createDoctor.UIN,
+			Email:      createDoctor.Email,
 		},
 	}
 
