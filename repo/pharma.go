@@ -77,6 +77,8 @@ func (p pharmacyOwnerRepo) CreatePharmacist(pharmacist *models.PharmacistAuth) e
 }
 
 type PharmacistRepo interface {
+	FindAuthByEmail(email string, pharmacyOwner *models.PharmacistAuth) error
+
 	FindActivePrescriptionsByCitizenUcn(citizenUcn string, activePrescriptions *[]models.Prescription) error
 	FulfillWholePrescription(branchId, prescriptionId uuid.UUID) error
 	FulfillMedicamentFromPrescription(prescriptionId uuid.UUID, medicamentId uuid.UUID) error
@@ -93,6 +95,10 @@ func NewPharmacistRepo() PharmacistRepo {
 	return &pharmacistRepo{
 		repo: CreateNewRepository(databaseConfig),
 	}
+}
+
+func (p pharmacistRepo) FindAuthByEmail(email string, pharmacyOwner *models.PharmacistAuth) error {
+	return p.repo.First(pharmacyOwner, "email = ?", email).Error
 }
 
 func (p pharmacistRepo) FindActivePrescriptionsByCitizenUcn(citizenUcn string, activePrescriptions *[]models.Prescription) error {
