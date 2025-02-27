@@ -3,44 +3,53 @@ package dto
 import (
 	"errors"
 	"github.com/google/uuid"
-	"medico/models"
+	"medico/common"
 )
 
-type AdminLogin struct {
-	Email    Email    `json:"email"`
-	Password Password `json:"password"`
+type RequestAdminLogin struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-func (a AdminLogin) Validate() error {
-	return errors.Join(a.Email.Validate(), a.Password.Validate())
+func (a *RequestAdminLogin) Validate() error {
+	return errors.Join(
+		validateEmail(a.Email),
+		validateTotalNumberOfCharacters(a.Password))
 }
 
-type AdminCreateModerator struct {
-	FirstName  string               `json:"first_name"`
-	SecondName string               `json:"second_name"`
-	LastName   string               `json:"last_name"`
-	Email      string               `json:"email"`
-	Password   string               `json:"password"`
-	Type       models.ModeratorType `json:"type"`
+type RequestAdminCreateModerator struct {
+	FirstName  string `json:"first_name"`
+	SecondName string `json:"second_name"`
+	LastName   string `json:"last_name"`
+	Email      string `json:"email"`
+	Password   string `json:"password"`
+	Type       string `json:"type"`
 }
 
-func (a AdminCreateModerator) Validate() error {
-	if a.Type == "" {
-		return errors.New("invalid role")
-	}
-
-	return nil
+func (a *RequestAdminCreateModerator) Validate() error {
+	return errors.Join(
+		validateNameLength(a.FirstName, 3, 32),
+		validateNameLength(a.SecondName, 3, 32),
+		validateNameLength(a.LastName, 3, 32),
+		validateEmail(a.Email),
+		validateNumberOfLowerCase(a.Password),
+		validateNumberOfUpperCase(a.Password),
+		validateNumberOfDigits(a.Password),
+		validateNumberOfSpecialCharacters(a.Password),
+		validateTotalNumberOfCharacters(a.Password),
+		validateNotIncludedWhiteSpaces(a.Password),
+		validateModeratorType(a.Type))
 }
 
-type AdminDeleteModerator struct {
+type AdminDeleteModerator struct { // TODO: Make to param
 	ModeratorId uuid.UUID `json:"moderatorId"`
 }
 
-type AdminGetModerator struct {
+type ResponseAdminGetModerator struct {
 	ID         uuid.UUID            `json:"id"`
 	FirstName  string               `json:"first_name"`
 	SecondName string               `json:"second_name"`
 	LastName   string               `json:"last_name"`
 	Email      string               `json:"email"`
-	Type       models.ModeratorType `json:"type"`
+	Type       common.ModeratorType `json:"type"`
 }

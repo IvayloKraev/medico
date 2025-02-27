@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
+	"medico/common"
 	"medico/dto"
 	"medico/models"
 	"medico/repo"
@@ -15,9 +16,9 @@ type AdminService interface {
 	CreateAuthenticationSession(adminId uuid.UUID) (uuid.UUID, time.Duration, error)
 	GetAuthenticationSession(sessionId uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionId uuid.UUID) error
-	CreateModerator(createModerator *dto.AdminCreateModerator) error
+	CreateModerator(createModerator *dto.RequestAdminCreateModerator) error
 	DeleteModerator(moderatorId uuid.UUID) error
-	GetModerators(dtoModerators *[]dto.AdminGetModerator) error
+	GetModerators(dtoModerators *[]dto.ResponseAdminGetModerator) error
 }
 
 type adminService struct {
@@ -56,7 +57,7 @@ func (s *adminService) DeleteAuthenticationSession(sessionId uuid.UUID) error {
 	return s.authSession.DeleteAuthSession(sessionId)
 }
 
-func (s *adminService) CreateModerator(createModerator *dto.AdminCreateModerator) error {
+func (s *adminService) CreateModerator(createModerator *dto.RequestAdminCreateModerator) error {
 	password, err := bcrypt.GenerateFromPassword([]byte(createModerator.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -71,7 +72,7 @@ func (s *adminService) CreateModerator(createModerator *dto.AdminCreateModerator
 			SecondName: createModerator.SecondName,
 			LastName:   createModerator.LastName,
 			Email:      createModerator.Email,
-			Type:       createModerator.Type,
+			Type:       common.ModeratorType(createModerator.Type),
 		},
 	}
 
@@ -86,17 +87,17 @@ func (s *adminService) DeleteModerator(moderatorId uuid.UUID) error {
 	return s.repo.DeleteModerator(moderatorId)
 }
 
-func (s *adminService) GetModerators(dtoModerators *[]dto.AdminGetModerator) error {
+func (s *adminService) GetModerators(dtoModerators *[]dto.ResponseAdminGetModerator) error {
 	var moderators []models.Moderator
 
 	if err := s.repo.FindAllModerators(&moderators); err != nil {
 		return err
 	}
 
-	*dtoModerators = make([]dto.AdminGetModerator, len(moderators))
+	*dtoModerators = make([]dto.ResponseAdminGetModerator, len(moderators))
 
 	for i, mod := range moderators {
-		(*dtoModerators)[i] = dto.AdminGetModerator{
+		(*dtoModerators)[i] = dto.ResponseAdminGetModerator{
 			ID:         mod.ID,
 			FirstName:  mod.FirstName,
 			SecondName: mod.SecondName,
