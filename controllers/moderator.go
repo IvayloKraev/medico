@@ -33,19 +33,14 @@ func NewDoctorModeratorController() DoctorModeratorController {
 }
 
 func (m *doctorModeratorController) Login(ctx *fiber.Ctx) error {
-	moderatorLogin := new(dto.ModeratorLogin)
+	moderatorLogin := new(dto.RequestModeratorLogin)
 
 	if err := ctx.BodyParser(moderatorLogin); err != nil {
 		return err
 	}
 
-	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email.ToString(), moderatorLogin.Password.ToString())
+	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email, moderatorLogin.Password)
 	if err != nil {
-		return err
-	}
-
-	moderator := models.Moderator{}
-	if err := m.service.GetModeratorDetails(moderatorId, &moderator); err != nil {
 		return err
 	}
 
@@ -108,7 +103,7 @@ func (m *doctorModeratorController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (m *doctorModeratorController) GetDoctors(ctx *fiber.Ctx) error {
-	doctors := new([]dto.ModeratorGetDoctors)
+	doctors := new([]dto.ResponseModeratorGetDoctors)
 
 	if err := m.service.FindAllDoctors(doctors); err != nil {
 		return err
@@ -167,13 +162,13 @@ func NewPharmaModeratorController() PharmaModeratorController {
 }
 
 func (m *pharmaModeratorController) Login(ctx *fiber.Ctx) error {
-	moderatorLogin := new(dto.ModeratorLogin)
+	moderatorLogin := new(dto.RequestModeratorLogin)
 
 	if err := ctx.BodyParser(moderatorLogin); err != nil {
 		return err
 	}
 
-	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email.ToString(), moderatorLogin.Password.ToString())
+	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email, moderatorLogin.Password)
 	if err != nil {
 		return err
 	}
@@ -242,7 +237,7 @@ func (m *pharmaModeratorController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (m *pharmaModeratorController) GetPharmacies(ctx *fiber.Ctx) error {
-	pharmacies := new([]dto.ModeratorGetPharmacies)
+	pharmacies := new([]dto.ResponseModeratorGetPharmacies)
 
 	if err := m.service.FindAllPharmacies(pharmacies); err != nil {
 		return err
@@ -251,7 +246,7 @@ func (m *pharmaModeratorController) GetPharmacies(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(pharmacies)
 }
 func (m *pharmaModeratorController) AddPharmacy(ctx *fiber.Ctx) error {
-	newPharmacy := new(dto.ModeratorCreatePharmacy)
+	newPharmacy := new(dto.RequestModeratorCreatePharmacy)
 
 	if err := ctx.BodyParser(&newPharmacy); err != nil {
 		return err
@@ -301,13 +296,13 @@ func NewMedicamentModeratorController() MedicamentModeratorController {
 }
 
 func (m *medicamentModeratorController) Login(ctx *fiber.Ctx) error {
-	moderatorLogin := new(dto.ModeratorLogin)
+	moderatorLogin := new(dto.RequestModeratorLogin)
 
 	if err := ctx.BodyParser(moderatorLogin); err != nil {
 		return err
 	}
 
-	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email.ToString(), moderatorLogin.Password.ToString())
+	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email, moderatorLogin.Password)
 	if err != nil {
 		return err
 	}
@@ -376,7 +371,7 @@ func (m *medicamentModeratorController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (m *medicamentModeratorController) GetMedicaments(ctx *fiber.Ctx) error {
-	medicaments := new([]dto.ModeratorGetMedicaments)
+	medicaments := new([]dto.ResponseModeratorGetMedicaments)
 
 	if err := m.service.FindAllMedicaments(medicaments); err != nil {
 		return err
@@ -385,7 +380,7 @@ func (m *medicamentModeratorController) GetMedicaments(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(medicaments)
 }
 func (m *medicamentModeratorController) AddMedicament(ctx *fiber.Ctx) error {
-	newMedicament := new(dto.ModeratorCreateMedicament)
+	newMedicament := new(dto.RequestModeratorCreateMedicament)
 
 	if err := ctx.BodyParser(&newMedicament); err != nil {
 		return err
@@ -435,13 +430,13 @@ func NewCitizenModeratorController() CitizenModeratorController {
 }
 
 func (m *citizenModeratorController) Login(ctx *fiber.Ctx) error {
-	moderatorLogin := new(dto.ModeratorLogin)
+	moderatorLogin := new(dto.RequestModeratorLogin)
 
 	if err := ctx.BodyParser(moderatorLogin); err != nil {
 		return err
 	}
 
-	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email.ToString(), moderatorLogin.Password.ToString())
+	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email, moderatorLogin.Password)
 	if err != nil {
 		return err
 	}
@@ -510,7 +505,7 @@ func (m *citizenModeratorController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (m *citizenModeratorController) GetCitizens(ctx *fiber.Ctx) error {
-	citizens := new([]dto.ModeratorGetCitizens)
+	citizens := new([]dto.ResponseModeratorGetCitizens)
 
 	if err := m.service.FindAllCitizens(citizens); err != nil {
 		return err
@@ -519,7 +514,7 @@ func (m *citizenModeratorController) GetCitizens(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(citizens)
 }
 func (m *citizenModeratorController) AddCitizen(ctx *fiber.Ctx) error {
-	newCitizen := new(dto.ModeratorCreateCitizen)
+	newCitizen := new(dto.RequestModeratorCreateCitizen)
 
 	if err := ctx.BodyParser(&newCitizen); err != nil {
 		return err
