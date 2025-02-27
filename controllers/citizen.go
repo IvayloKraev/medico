@@ -29,19 +29,15 @@ func NewCitizenController() CitizenController {
 }
 
 func (c *citizenController) Login(ctx *fiber.Ctx) error {
-	loginData := new(dto.CitizenLogin)
+	loginData := new(dto.RequestCitizenLogin)
 
 	if err := ctx.BodyParser(loginData); err != nil {
 		return err
 	}
 
-	if err := loginData.Validate(); err != nil {
-		return err
-	}
-
 	citizenAuth := models.CitizenAuth{}
 
-	if err := c.service.AuthenticateByEmailAndPassword(loginData.Email.ToString(), loginData.Password.ToString(), &citizenAuth); err != nil {
+	if err := c.service.AuthenticateByEmailAndPassword(loginData.Email, loginData.Password, &citizenAuth); err != nil {
 		return err
 	}
 

@@ -10,6 +10,7 @@ type CitizenRepo interface {
 	FindAuthByEmail(email string, citizenAuth *models.CitizenAuth) error
 	FindMedicalInfo(citizenId uuid.UUID, citizen *models.Citizen) error
 	FindAllPrescriptions(citizenId uuid.UUID, prescriptions *[]models.Prescription) error
+	FindPersonalDoctor(citizenId uuid.UUID, doctor *models.Doctor) error
 	FindAvailablePharmacies(prescriptionId uuid.UUID, branches *[]models.PharmacyBranch) error
 }
 
@@ -27,7 +28,11 @@ func (c *citizenRepo) FindAuthByEmail(email string, citizenAuth *models.CitizenA
 }
 
 func (c *citizenRepo) FindMedicalInfo(citizenId uuid.UUID, citizen *models.Citizen) error {
-	return c.repo.Preload("PersonalDoctor").First(citizen, "id = ?", citizenId).Error
+	return c.repo.First(citizen, "id = ?", citizenId).Error
+}
+
+func (c *citizenRepo) FindPersonalDoctor(citizenId uuid.UUID, doctor *models.Doctor) error {
+	return c.repo.Model(models.Doctor{}).Joins("citizens ON citizens.personal_doctorID = doctor.id").First(doctor, "id = ?", citizenId).Error
 }
 
 func (c *citizenRepo) FindAllPrescriptions(citizenId uuid.UUID, prescriptions *[]models.Prescription) error {

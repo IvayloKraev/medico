@@ -16,9 +16,10 @@ type CitizenService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	GetMedicalInfo(citizenId uuid.UUID, medicalInfo *dto.CitizenMedicalInfo) error
-	FindAllAvailablePharmacies(prescriptionId *dto.CitizenAvailablePharmacyGet, availablePharmacies *[]dto.CitizenAvailablePharmacy) error
-	ListPrescriptions(citizenId uuid.UUID, prescriptionsDto *[]dto.CitizenPrescription) error
+	GetMedicalInfo(citizenId uuid.UUID, medicalInfo *dto.ResponseCitizenMedicalInfo) error
+	GetPersonalDoctor(citizenId uuid.UUID, doctor *dto.ResponseCitizenPersonalDoctor) error
+	FindAllAvailablePharmacies(prescriptionId *dto.CitizenAvailablePharmacyGet, availablePharmacies *[]dto.ResponseCitizenAvailablePharmacy) error
+	ListPrescriptions(citizenId uuid.UUID, prescriptionsDto *[]dto.ResponseCitizenPrescription) error
 }
 
 type citizenService struct {
@@ -58,49 +59,54 @@ func (c *citizenService) DeleteAuthenticationSession(sessionID uuid.UUID) error 
 	return c.authSession.DeleteAuthSession(sessionID)
 }
 
-func (c *citizenService) GetMedicalInfo(citizenId uuid.UUID, medicalInfo *dto.CitizenMedicalInfo) error {
+func (c *citizenService) GetMedicalInfo(citizenId uuid.UUID, medicalInfo *dto.ResponseCitizenMedicalInfo) error {
 	citizen := models.Citizen{}
 
 	if err := c.citizenRepo.FindMedicalInfo(citizenId, &citizen); err != nil {
 		return err
 	}
 
-	medicalInfo = &dto.CitizenMedicalInfo{
+	medicalInfo = &dto.ResponseCitizenMedicalInfo{
 		FirstName:  citizen.FirstName,
 		SecondName: citizen.SecondName,
 		LastName:   citizen.LastName,
 		BirthDate:  citizen.Birthday,
 		Sex:        string(citizen.Sex),
 		UCN:        citizen.UCN,
-		PersonalDoctor: struct {
-			FirstName  string `json:"first_name"`
-			SecondName string `json:"second_name"`
-			LastName   string `json:"last_name"`
-			UIN        string `json:"uin"`
-			Email      string `json:"email"`
-		}{
-			FirstName:  citizen.PersonalDoctor.FirstName,
-			SecondName: citizen.PersonalDoctor.SecondName,
-			LastName:   citizen.PersonalDoctor.LastName,
-			UIN:        citizen.PersonalDoctor.UIN,
-			Email:      citizen.PersonalDoctor.Email,
-		},
 	}
 
 	return nil
 }
 
-func (c *citizenService) FindAllAvailablePharmacies(prescriptionId *dto.CitizenAvailablePharmacyGet, availablePharmacies *[]dto.CitizenAvailablePharmacy) error {
+func (c *citizenService) GetPersonalDoctor(citizenId uuid.UUID, doctorDto *dto.ResponseCitizenPersonalDoctor) error {
+	doctor := models.Doctor{}
+
+	if err := c.citizenRepo.FindPersonalDoctor(citizenId, &doctor); err != nil {
+		return err
+	}
+
+	doctorDto = &dto.ResponseCitizenPersonalDoctor{
+		FirstName:  doctor.FirstName,
+		SecondName: doctor.SecondName,
+		LastName:   doctor.LastName,
+		UIN:        doctor.UIN,
+		Email:      doctor.Email,
+	}
+
+	return nil
+}
+
+func (c *citizenService) FindAllAvailablePharmacies(prescriptionId *dto.CitizenAvailablePharmacyGet, availablePharmacies *[]dto.ResponseCitizenAvailablePharmacy) error {
 	branches := new([]models.PharmacyBranch)
 
 	if err := c.citizenRepo.FindAvailablePharmacies(prescriptionId.PrescriptionId, branches); err != nil {
 		return err
 	}
 
-	*availablePharmacies = make([]dto.CitizenAvailablePharmacy, len(*branches))
+	*availablePharmacies = make([]dto.ResponseCitizenAvailablePharmacy, len(*branches))
 
 	for i, branch := range *branches {
-		(*availablePharmacies)[i] = dto.CitizenAvailablePharmacy{
+		(*availablePharmacies)[i] = dto.ResponseCitizenAvailablePharmacy{
 			Name:      branch.Name,
 			Latitude:  branch.Latitude,
 			Longitude: branch.Longitude,
@@ -110,17 +116,17 @@ func (c *citizenService) FindAllAvailablePharmacies(prescriptionId *dto.CitizenA
 	return nil
 }
 
-func (c *citizenService) ListPrescriptions(citizenId uuid.UUID, prescriptionsDto *[]dto.CitizenPrescription) error {
+func (c *citizenService) ListPrescriptions(citizenId uuid.UUID, prescriptionsDto *[]dto.ResponseCitizenPrescription) error {
 	prescriptions := new([]models.Prescription)
 
 	if err := c.citizenRepo.FindAllPrescriptions(citizenId, prescriptions); err != nil {
 		return err
 	}
 
-	*prescriptionsDto = make([]dto.CitizenPrescription, len(*prescriptions))
+	*prescriptionsDto = make([]dto.ResponseCitizenPrescription, len(*prescriptions))
 
 	for i, prescription := range *prescriptions {
-		(*prescriptionsDto)[i] = dto.CitizenPrescription{
+		(*prescriptionsDto)[i] = dto.ResponseCitizenPrescription{
 			Doctor: struct {
 				FirstName string `json:"first_name"`
 				LastName  string `json:"last_name"`
