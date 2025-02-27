@@ -33,11 +33,11 @@ func (d *RequestDoctorCreatePrescription) Validate() error {
 		validateTime(d.EndDate, time.Now(), TimeAfter))
 }
 
-type DoctorGetCitizenInfo struct { // TODO: Make to param
+type QueryDoctorGetCitizenInfo struct {
 	CitizenUcn string `json:"citizen_ucn"`
 }
 
-type DoctorGetCitizenPrescription struct { // TODO: Make to param
+type QueryDoctorGetCitizenPrescription struct {
 	CitizenId uuid.UUID `json:"citizen_id"`
 }
 

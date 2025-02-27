@@ -105,9 +105,9 @@ func (d doctorController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (d doctorController) GetCitizenInfo(ctx *fiber.Ctx) error {
-	citizenUcnDto := new(dto.DoctorGetCitizenInfo)
+	citizenUcnDto := new(dto.QueryDoctorGetCitizenInfo)
 
-	if err := ctx.BodyParser(&citizenUcnDto); err != nil {
+	if err := ctx.QueryParser(citizenUcnDto); err != nil {
 		return err
 	}
 
@@ -121,9 +121,9 @@ func (d doctorController) GetCitizenInfo(ctx *fiber.Ctx) error {
 }
 
 func (d doctorController) GetCitizenPrescriptions(ctx *fiber.Ctx) error {
-	citizenIdDto := new(dto.DoctorGetCitizenPrescription)
+	citizenIdDto := new(dto.QueryDoctorGetCitizenPrescription)
 
-	if err := ctx.BodyParser(&citizenIdDto); err != nil {
+	if err := ctx.QueryParser(citizenIdDto); err != nil {
 		return err
 	}
 

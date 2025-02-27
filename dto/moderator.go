@@ -16,7 +16,7 @@ func (m *RequestModeratorLogin) Validate() error {
 		validateTotalNumberOfCharacters(m.Password))
 }
 
-type ModeratorCreateDoctor struct {
+type RequestModeratorCreateDoctor struct {
 	FirstName  string `json:"first_name"`
 	SecondName string `json:"second_name"`
 	LastName   string `json:"last_name"`
@@ -25,7 +25,7 @@ type ModeratorCreateDoctor struct {
 	Password   string `json:"password"`
 }
 
-func (m *ModeratorCreateDoctor) Validate() error {
+func (m *RequestModeratorCreateDoctor) Validate() error {
 	return errors.Join(
 		validateNameLength(m.FirstName, 3, 32),
 		validateNameLength(m.SecondName, 3, 32),
@@ -40,7 +40,7 @@ func (m *ModeratorCreateDoctor) Validate() error {
 		validateUinLength(m.UIN))
 }
 
-type ModeratorDeleteDoctor struct { // TODO: Make to param
+type QueryModeratorDeleteDoctor struct {
 	DoctorId uuid.UUID `json:"doctor_id"`
 }
 
@@ -65,7 +65,7 @@ func (m *RequestModeratorCreateMedicament) Validate() error {
 		validateAtcCode(m.ATC))
 }
 
-type ModeratorDeleteMedicament struct { // TODO: Make to param
+type QueryModeratorDeleteMedicament struct {
 	MedicamentId uuid.UUID `json:"medicament_id"`
 }
 type ResponseModeratorGetMedicaments struct {
@@ -95,7 +95,7 @@ func (m *RequestModeratorCreatePharmacy) Validate() error {
 		validateNotIncludedWhiteSpaces(m.OwnerPassword))
 }
 
-type ModeratorDeletePharmacy struct { // TODO: Make to param
+type QueryModeratorDeletePharmacy struct {
 	PharmacyId uuid.UUID `json:"pharmacy_id"`
 }
 type ResponseModeratorGetPharmacies struct {
@@ -129,7 +129,7 @@ func (m *RequestModeratorCreateCitizen) Validate() error {
 		validateUcn(m.UCN))
 }
 
-type ModeratorDeleteCitizen struct { // TODO: Make to param
+type QueryModeratorDeleteCitizen struct {
 	CitizenId uuid.UUID `json:"citizen_id"`
 }
 type ResponseModeratorGetCitizens struct {

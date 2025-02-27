@@ -41,7 +41,7 @@ func (a *RequestAdminCreateModerator) Validate() error {
 		validateModeratorType(a.Type))
 }
 
-type AdminDeleteModerator struct { // TODO: Make to param
+type QueryAdminDeleteModerator struct {
 	ModeratorId uuid.UUID `json:"moderatorId"`
 }
 

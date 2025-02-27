@@ -18,7 +18,7 @@ type CitizenService interface {
 
 	GetMedicalInfo(citizenId uuid.UUID, medicalInfo *dto.ResponseCitizenMedicalInfo) error
 	GetPersonalDoctor(citizenId uuid.UUID, doctor *dto.ResponseCitizenPersonalDoctor) error
-	FindAllAvailablePharmacies(prescriptionId *dto.CitizenAvailablePharmacyGet, availablePharmacies *[]dto.ResponseCitizenAvailablePharmacy) error
+	FindAllAvailablePharmacies(prescriptionId *dto.QueryCitizenAvailablePharmacyGet, availablePharmacies *[]dto.ResponseCitizenAvailablePharmacy) error
 	ListPrescriptions(citizenId uuid.UUID, prescriptionsDto *[]dto.ResponseCitizenPrescription) error
 }
 
@@ -96,7 +96,7 @@ func (c *citizenService) GetPersonalDoctor(citizenId uuid.UUID, doctorDto *dto.R
 	return nil
 }
 
-func (c *citizenService) FindAllAvailablePharmacies(prescriptionId *dto.CitizenAvailablePharmacyGet, availablePharmacies *[]dto.ResponseCitizenAvailablePharmacy) error {
+func (c *citizenService) FindAllAvailablePharmacies(prescriptionId *dto.QueryCitizenAvailablePharmacyGet, availablePharmacies *[]dto.ResponseCitizenAvailablePharmacy) error {
 	branches := new([]models.PharmacyBranch)
 
 	if err := c.citizenRepo.FindAvailablePharmacies(prescriptionId.PrescriptionId, branches); err != nil {

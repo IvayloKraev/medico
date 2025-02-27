@@ -30,7 +30,7 @@ func NewAdminController() AdminController {
 func (c *adminController) Login(ctx *fiber.Ctx) error {
 	adminLogin := new(dto.RequestAdminLogin)
 
-	if err := ctx.BodyParser(&adminLogin); err != nil {
+	if err := ctx.BodyParser(adminLogin); err != nil {
 		return err
 	}
 
@@ -113,7 +113,7 @@ func (c *adminController) GetModerators(ctx *fiber.Ctx) error {
 func (c *adminController) AddModerator(ctx *fiber.Ctx) error {
 	newModerator := new(dto.RequestAdminCreateModerator)
 
-	if err := ctx.BodyParser(&newModerator); err != nil {
+	if err := ctx.BodyParser(newModerator); err != nil {
 		return err
 	}
 
@@ -126,9 +126,9 @@ func (c *adminController) AddModerator(ctx *fiber.Ctx) error {
 }
 
 func (c *adminController) DeleteModerator(ctx *fiber.Ctx) error {
-	moderatorId := new(dto.AdminDeleteModerator)
+	moderatorId := new(dto.QueryAdminDeleteModerator)
 
-	if err := ctx.BodyParser(&moderatorId); err != nil {
+	if err := ctx.QueryParser(moderatorId); err != nil {
 		return err
 	}
 

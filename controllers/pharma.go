@@ -34,7 +34,7 @@ func NewPharmacyOwnerController() PharmacyOwnerController {
 func (c *pharmacyOwnerController) Login(ctx *fiber.Ctx) error {
 	pharmacyOwnerLogin := new(dto.RequestPharmacyOwnerAuth)
 
-	if err := ctx.BodyParser(&pharmacyOwnerLogin); err != nil {
+	if err := ctx.BodyParser(pharmacyOwnerLogin); err != nil {
 		return err
 	}
 
@@ -127,7 +127,7 @@ func (c *pharmacyOwnerController) GetAllPharmacists(ctx *fiber.Ctx) error {
 func (c *pharmacyOwnerController) NewPharmacyBranch(ctx *fiber.Ctx) error {
 	newBranch := new(dto.RequestPharmacyOwnerNewBranch)
 
-	if err := ctx.BodyParser(&newBranch); err != nil {
+	if err := ctx.BodyParser(newBranch); err != nil {
 		return err
 	}
 
@@ -141,7 +141,7 @@ func (c *pharmacyOwnerController) NewPharmacyBranch(ctx *fiber.Ctx) error {
 
 func (c *pharmacyOwnerController) NewPharmacist(ctx *fiber.Ctx) error {
 	newPharmacist := new(dto.RequestPharmacyOwnerNewPharmacist)
-	if err := ctx.BodyParser(&newPharmacist); err != nil {
+	if err := ctx.BodyParser(newPharmacist); err != nil {
 		return err
 	}
 

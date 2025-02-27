@@ -112,9 +112,9 @@ func (m *doctorModeratorController) GetDoctors(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(doctors)
 }
 func (m *doctorModeratorController) AddDoctor(ctx *fiber.Ctx) error {
-	newDoctor := new(dto.ModeratorCreateDoctor)
+	newDoctor := new(dto.RequestModeratorCreateDoctor)
 
-	if err := ctx.BodyParser(&newDoctor); err != nil {
+	if err := ctx.BodyParser(newDoctor); err != nil {
 		return err
 	}
 
@@ -126,9 +126,9 @@ func (m *doctorModeratorController) AddDoctor(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(nil)
 }
 func (m *doctorModeratorController) DeleteDoctor(ctx *fiber.Ctx) error {
-	doctorId := new(dto.ModeratorDeleteDoctor)
+	doctorId := new(dto.QueryModeratorDeleteDoctor)
 
-	if err := ctx.BodyParser(&doctorId); err != nil {
+	if err := ctx.QueryParser(doctorId); err != nil {
 		return err
 	}
 
@@ -248,7 +248,7 @@ func (m *pharmaModeratorController) GetPharmacies(ctx *fiber.Ctx) error {
 func (m *pharmaModeratorController) AddPharmacy(ctx *fiber.Ctx) error {
 	newPharmacy := new(dto.RequestModeratorCreatePharmacy)
 
-	if err := ctx.BodyParser(&newPharmacy); err != nil {
+	if err := ctx.BodyParser(newPharmacy); err != nil {
 		return err
 	}
 
@@ -260,9 +260,9 @@ func (m *pharmaModeratorController) AddPharmacy(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(nil)
 }
 func (m *pharmaModeratorController) DeletePharmacy(ctx *fiber.Ctx) error {
-	pharmacyId := new(dto.ModeratorDeletePharmacy)
+	pharmacyId := new(dto.QueryModeratorDeletePharmacy)
 
-	if err := ctx.BodyParser(&pharmacyId); err != nil {
+	if err := ctx.QueryParser(pharmacyId); err != nil {
 		return err
 	}
 
@@ -382,7 +382,7 @@ func (m *medicamentModeratorController) GetMedicaments(ctx *fiber.Ctx) error {
 func (m *medicamentModeratorController) AddMedicament(ctx *fiber.Ctx) error {
 	newMedicament := new(dto.RequestModeratorCreateMedicament)
 
-	if err := ctx.BodyParser(&newMedicament); err != nil {
+	if err := ctx.BodyParser(newMedicament); err != nil {
 		return err
 	}
 
@@ -394,9 +394,9 @@ func (m *medicamentModeratorController) AddMedicament(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(nil)
 }
 func (m *medicamentModeratorController) DeleteMedicament(ctx *fiber.Ctx) error {
-	medicamentId := new(dto.ModeratorDeleteMedicament)
+	medicamentId := new(dto.QueryModeratorDeleteMedicament)
 
-	if err := ctx.BodyParser(&medicamentId); err != nil {
+	if err := ctx.QueryParser(medicamentId); err != nil {
 		return err
 	}
 
@@ -516,7 +516,7 @@ func (m *citizenModeratorController) GetCitizens(ctx *fiber.Ctx) error {
 func (m *citizenModeratorController) AddCitizen(ctx *fiber.Ctx) error {
 	newCitizen := new(dto.RequestModeratorCreateCitizen)
 
-	if err := ctx.BodyParser(&newCitizen); err != nil {
+	if err := ctx.BodyParser(newCitizen); err != nil {
 		return err
 	}
 
@@ -528,9 +528,9 @@ func (m *citizenModeratorController) AddCitizen(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusCreated).JSON(nil)
 }
 func (m *citizenModeratorController) DeleteCitizen(ctx *fiber.Ctx) error {
-	citizenId := new(dto.ModeratorDeleteCitizen)
+	citizenId := new(dto.QueryModeratorDeleteCitizen)
 
-	if err := ctx.BodyParser(&citizenId); err != nil {
+	if err := ctx.QueryParser(citizenId); err != nil {
 		return err
 	}
 

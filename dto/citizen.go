@@ -34,7 +34,7 @@ type ResponseCitizenPersonalDoctor struct {
 	Email      string `json:"email"`
 }
 
-type CitizenAvailablePharmacyGet struct { // TODO: Make to param
+type QueryCitizenAvailablePharmacyGet struct {
 	PrescriptionId uuid.UUID `json:"prescription_id"`
 }
 

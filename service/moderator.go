@@ -21,8 +21,8 @@ type DoctorModeratorService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	CreateDoctor(createDoctor *dto.ModeratorCreateDoctor) error
-	DeleteDoctor(doctorId *dto.ModeratorDeleteDoctor) error
+	CreateDoctor(createDoctor *dto.RequestModeratorCreateDoctor) error
+	DeleteDoctor(doctorId *dto.QueryModeratorDeleteDoctor) error
 	FindAllDoctors(dtoDoctors *[]dto.ResponseModeratorGetDoctors) error
 }
 
@@ -66,7 +66,7 @@ func (m *doctorModeratorService) DeleteAuthenticationSession(sessionID uuid.UUID
 	return m.authSession.DeleteAuthSession(sessionID)
 }
 
-func (m *doctorModeratorService) CreateDoctor(createDoctor *dto.ModeratorCreateDoctor) error {
+func (m *doctorModeratorService) CreateDoctor(createDoctor *dto.RequestModeratorCreateDoctor) error {
 	password, err := bcrypt.GenerateFromPassword([]byte(createDoctor.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -90,7 +90,7 @@ func (m *doctorModeratorService) CreateDoctor(createDoctor *dto.ModeratorCreateD
 
 	return nil
 }
-func (m *doctorModeratorService) DeleteDoctor(doctorId *dto.ModeratorDeleteDoctor) error {
+func (m *doctorModeratorService) DeleteDoctor(doctorId *dto.QueryModeratorDeleteDoctor) error {
 	return m.repo.DeleteDoctor(doctorId.DoctorId)
 }
 func (m *doctorModeratorService) FindAllDoctors(dtoDoctors *[]dto.ResponseModeratorGetDoctors) error {
@@ -127,7 +127,7 @@ type PharmaModeratorService interface {
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
 	CreatePharmacyAndOwner(createPharmacy *dto.RequestModeratorCreatePharmacy) error
-	DeletePharmacy(pharmacyId *dto.ModeratorDeletePharmacy) error
+	DeletePharmacy(pharmacyId *dto.QueryModeratorDeletePharmacy) error
 	FindAllPharmacies(dtoPharmacies *[]dto.ResponseModeratorGetPharmacies) error
 }
 
@@ -202,7 +202,7 @@ func (m *pharmaModeratorService) CreatePharmacyAndOwner(createPharmacy *dto.Requ
 
 	return nil
 }
-func (m *pharmaModeratorService) DeletePharmacy(pharmacyId *dto.ModeratorDeletePharmacy) error {
+func (m *pharmaModeratorService) DeletePharmacy(pharmacyId *dto.QueryModeratorDeletePharmacy) error {
 	return m.repo.DeletePharmacy(pharmacyId.PharmacyId)
 }
 func (m *pharmaModeratorService) FindAllPharmacies(dtoPharmacies *[]dto.ResponseModeratorGetPharmacies) error {
@@ -236,7 +236,7 @@ type MedicamentModeratorService interface {
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
 	CreateMedicament(createMedicament *dto.RequestModeratorCreateMedicament) error
-	DeleteMedicament(medicamentId *dto.ModeratorDeleteMedicament) error
+	DeleteMedicament(medicamentId *dto.QueryModeratorDeleteMedicament) error
 	FindAllMedicaments(dtoMedicaments *[]dto.ResponseModeratorGetMedicaments) error
 }
 
@@ -290,7 +290,7 @@ func (m *medicamentModeratorService) CreateMedicament(createMedicament *dto.Requ
 
 	return m.repo.CreateMedicament(&newMedicament)
 }
-func (m *medicamentModeratorService) DeleteMedicament(medicamentId *dto.ModeratorDeleteMedicament) error {
+func (m *medicamentModeratorService) DeleteMedicament(medicamentId *dto.QueryModeratorDeleteMedicament) error {
 	return m.repo.DeleteMedicament(medicamentId.MedicamentId)
 }
 func (m *medicamentModeratorService) FindAllMedicaments(dtoMedicaments *[]dto.ResponseModeratorGetMedicaments) error {
@@ -325,7 +325,7 @@ type CitizenModeratorService interface {
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
 	CreateCitizen(createCitizen *dto.RequestModeratorCreateCitizen) error
-	DeleteCitizen(citizenId *dto.ModeratorDeleteCitizen) error
+	DeleteCitizen(citizenId *dto.QueryModeratorDeleteCitizen) error
 	FindAllCitizens(dtoCitizens *[]dto.ResponseModeratorGetCitizens) error
 }
 
@@ -395,7 +395,7 @@ func (m *citizenModeratorService) CreateCitizen(createCitizen *dto.RequestModera
 
 	return nil
 }
-func (m *citizenModeratorService) DeleteCitizen(citizenId *dto.ModeratorDeleteCitizen) error {
+func (m *citizenModeratorService) DeleteCitizen(citizenId *dto.QueryModeratorDeleteCitizen) error {
 	return m.repo.DeleteCitizen(citizenId.CitizenId)
 }
 func (m *citizenModeratorService) FindAllCitizens(dtoCitizens *[]dto.ResponseModeratorGetCitizens) error {
