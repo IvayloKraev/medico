@@ -1,16 +1,23 @@
 package dto
 
 import (
+	"errors"
 	"github.com/google/uuid"
 	"time"
 )
 
-type DoctorLogin struct {
+type RequestDoctorLogin struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
-type DoctorCreatePrescription struct {
+func (d *RequestDoctorLogin) Validate() error {
+	return errors.Join(
+		validateEmail(d.Email),
+		validateTotalNumberOfCharacters(d.Password))
+}
+
+type RequestDoctorCreatePrescription struct {
 	CitizenId   uuid.UUID `json:"citizen_id"`
 	Name        string    `json:"name"`
 	EndDate     time.Time `json:"end_date"`
@@ -20,15 +27,21 @@ type DoctorCreatePrescription struct {
 	} `json:"medicaments"`
 }
 
-type DoctorGetCitizenInfo struct {
+func (d *RequestDoctorCreatePrescription) Validate() error {
+	return errors.Join(
+		validateNameLength(d.Name, 3, 32),
+		validateTime(d.EndDate, time.Now(), TimeAfter))
+}
+
+type QueryDoctorGetCitizenInfo struct {
 	CitizenUcn string `json:"citizen_ucn"`
 }
 
-type DoctorGetCitizenPrescription struct {
+type QueryDoctorGetCitizenPrescription struct {
 	CitizenId uuid.UUID `json:"citizen_id"`
 }
 
-type DoctorCitizenInfo struct {
+type ResponseDoctorCitizenInfo struct {
 	ID         uuid.UUID `json:"id"`
 	FirstName  string    `json:"first_name"`
 	SecondName string    `json:"second_name"`
@@ -37,7 +50,7 @@ type DoctorCitizenInfo struct {
 	Email      string    `json:"email"`
 }
 
-type DoctorGetCitizenPrescriptionResponse struct {
+type ResponseDoctorGetCitizenPrescriptionResponse struct {
 	Id          uuid.UUID `json:"id"`
 	Name        string
 	Medicaments []struct {

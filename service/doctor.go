@@ -17,9 +17,9 @@ type DoctorService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	GetCitizenInfo(doctorId uuid.UUID, citizenUcn string, citizenDto *dto.DoctorCitizenInfo) error
-	GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, citizenPrescriptionDto *[]dto.DoctorGetCitizenPrescriptionResponse) error
-	CreatePrescription(doctorId, citizenId uuid.UUID, newPrescriptionDto *dto.DoctorCreatePrescription) error
+	GetCitizenInfo(doctorId uuid.UUID, citizenUcn string, citizenDto *dto.ResponseDoctorCitizenInfo) error
+	GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, citizenPrescriptionDto *[]dto.ResponseDoctorGetCitizenPrescriptionResponse) error
+	CreatePrescription(doctorId, citizenId uuid.UUID, newPrescriptionDto *dto.RequestDoctorCreatePrescription) error
 }
 
 type doctorService struct {
@@ -57,7 +57,7 @@ func (d *doctorService) DeleteAuthenticationSession(sessionID uuid.UUID) error {
 	return d.authSession.DeleteAuthSession(sessionID)
 }
 
-func (d *doctorService) GetCitizenInfo(doctorId uuid.UUID, citizenUcn string, citizenDto *dto.DoctorCitizenInfo) error {
+func (d *doctorService) GetCitizenInfo(doctorId uuid.UUID, citizenUcn string, citizenDto *dto.ResponseDoctorCitizenInfo) error {
 	citizen := models.Citizen{}
 
 	if err := d.repo.FindCitizenByUcn(doctorId, citizenUcn, &citizen); err != nil {
@@ -74,17 +74,17 @@ func (d *doctorService) GetCitizenInfo(doctorId uuid.UUID, citizenUcn string, ci
 	return nil
 }
 
-func (d *doctorService) GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, citizenPrescriptionDto *[]dto.DoctorGetCitizenPrescriptionResponse) error {
+func (d *doctorService) GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, citizenPrescriptionDto *[]dto.ResponseDoctorGetCitizenPrescriptionResponse) error {
 	var prescriptions []models.Prescription
 
 	if err := d.repo.FindPrescriptionsByCitizenId(citizenId, &prescriptions); err != nil {
 		return err
 	}
 
-	*citizenPrescriptionDto = make([]dto.DoctorGetCitizenPrescriptionResponse, len(prescriptions))
+	*citizenPrescriptionDto = make([]dto.ResponseDoctorGetCitizenPrescriptionResponse, len(prescriptions))
 
 	for i, prescription := range prescriptions {
-		(*citizenPrescriptionDto)[i] = dto.DoctorGetCitizenPrescriptionResponse{
+		(*citizenPrescriptionDto)[i] = dto.ResponseDoctorGetCitizenPrescriptionResponse{
 			Id:          prescription.ID,
 			Name:        prescription.Name,
 			State:       string(prescription.State),
@@ -110,7 +110,7 @@ func (d *doctorService) GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, 
 	return nil
 }
 
-func (d *doctorService) CreatePrescription(doctorId uuid.UUID, citizenId uuid.UUID, newPrescriptionDto *dto.DoctorCreatePrescription) error {
+func (d *doctorService) CreatePrescription(doctorId uuid.UUID, citizenId uuid.UUID, newPrescriptionDto *dto.RequestDoctorCreatePrescription) error {
 	medicaments := make([]models.PrescriptionMedicament, len(newPrescriptionDto.Medicaments))
 
 	for i, medicament := range newPrescriptionDto.Medicaments {

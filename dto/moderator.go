@@ -5,16 +5,18 @@ import (
 	"github.com/google/uuid"
 )
 
-type ModeratorLogin struct {
-	Email    Email    `json:"email"`
-	Password Password `json:"password"`
+type RequestModeratorLogin struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-func (m *ModeratorLogin) Validate() error {
-	return errors.Join(m.Email.Validate(), m.Password.Validate())
+func (m *RequestModeratorLogin) Validate() error {
+	return errors.Join(
+		validateEmail(m.Email),
+		validateTotalNumberOfCharacters(m.Password))
 }
 
-type ModeratorCreateDoctor struct {
+type RequestModeratorCreateDoctor struct {
 	FirstName  string `json:"first_name"`
 	SecondName string `json:"second_name"`
 	LastName   string `json:"last_name"`
@@ -23,11 +25,26 @@ type ModeratorCreateDoctor struct {
 	Password   string `json:"password"`
 }
 
-type ModeratorDeleteDoctor struct {
+func (m *RequestModeratorCreateDoctor) Validate() error {
+	return errors.Join(
+		validateNameLength(m.FirstName, 3, 32),
+		validateNameLength(m.SecondName, 3, 32),
+		validateNameLength(m.LastName, 3, 32),
+		validateEmail(m.Email),
+		validateNumberOfLowerCase(m.Password),
+		validateNumberOfUpperCase(m.Password),
+		validateNumberOfDigits(m.Password),
+		validateNumberOfSpecialCharacters(m.Password),
+		validateTotalNumberOfCharacters(m.Password),
+		validateNotIncludedWhiteSpaces(m.Password),
+		validateUinLength(m.UIN))
+}
+
+type QueryModeratorDeleteDoctor struct {
 	DoctorId uuid.UUID `json:"doctor_id"`
 }
 
-type ModeratorGetDoctors struct {
+type ResponseModeratorGetDoctors struct {
 	ID         uuid.UUID `json:"id"`
 	FirstName  string    `json:"first_name"`
 	SecondName string    `json:"second_name"`
@@ -36,42 +53,58 @@ type ModeratorGetDoctors struct {
 	Email      string    `json:"email"`
 }
 
-type ModeratorCreateMedicament struct {
+type RequestModeratorCreateMedicament struct {
 	OfficialName      string   `json:"official_name"`
 	ActiveIngredients []string `json:"active_ingredients"`
 	ATC               string   `json:"atc"`
-	//RequiredPrescription bool     `json:"required_prescriptions"`
 }
-type ModeratorDeleteMedicament struct {
+
+func (m *RequestModeratorCreateMedicament) Validate() error {
+	return errors.Join(
+		validateNameLength(m.OfficialName, 3, 1000),
+		validateAtcCode(m.ATC))
+}
+
+type QueryModeratorDeleteMedicament struct {
 	MedicamentId uuid.UUID `json:"medicament_id"`
 }
-type ModeratorGetMedicaments struct {
+type ResponseModeratorGetMedicaments struct {
 	ID                uuid.UUID `json:"id"`
 	OfficialName      string    `json:"official_name"`
 	ActiveIngredients []string  `json:"active_ingredients"`
 	ATC               string    `json:"atc"`
 }
 
-//type ModeratorCreatePharmacyOwner struct {
-//}
-//type ModeratorDeletePharmacyOwner struct{}
-
-type ModeratorCreatePharmacy struct {
+type RequestModeratorCreatePharmacy struct {
 	Name          string `json:"name"`
 	OwnerName     string `json:"owner_name"`
 	OwnerEmail    string `json:"owner_email"`
 	OwnerPassword string `json:"owner_password"`
 }
-type ModeratorDeletePharmacy struct {
+
+func (m *RequestModeratorCreatePharmacy) Validate() error {
+	return errors.Join(
+		validateNameLength(m.Name, 1, 300),
+		validateNameLength(m.OwnerName, 3, 32),
+		validateEmail(m.OwnerEmail),
+		validateNumberOfLowerCase(m.OwnerPassword),
+		validateNumberOfUpperCase(m.OwnerPassword),
+		validateNumberOfDigits(m.OwnerPassword),
+		validateNumberOfSpecialCharacters(m.OwnerPassword),
+		validateTotalNumberOfCharacters(m.OwnerPassword),
+		validateNotIncludedWhiteSpaces(m.OwnerPassword))
+}
+
+type QueryModeratorDeletePharmacy struct {
 	PharmacyId uuid.UUID `json:"pharmacy_id"`
 }
-type ModeratorGetPharmacies struct {
+type ResponseModeratorGetPharmacies struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	OwnerName string    `json:"pharmacy_owner"`
 }
 
-type ModeratorCreateCitizen struct {
+type RequestModeratorCreateCitizen struct {
 	FirstName        string    `json:"first_name"`
 	SecondName       string    `json:"second_name"`
 	LastName         string    `json:"last_name"`
@@ -80,10 +113,26 @@ type ModeratorCreateCitizen struct {
 	Password         string    `json:"password"`
 	PersonalDoctorId uuid.UUID `json:"personal_doctor_id"`
 }
-type ModeratorDeleteCitizen struct {
+
+func (m *RequestModeratorCreateCitizen) Validate() error {
+	return errors.Join(
+		validateNameLength(m.FirstName, 3, 32),
+		validateNameLength(m.SecondName, 3, 32),
+		validateNameLength(m.LastName, 3, 32),
+		validateEmail(m.Email),
+		validateNumberOfLowerCase(m.Password),
+		validateNumberOfUpperCase(m.Password),
+		validateNumberOfDigits(m.Password),
+		validateNumberOfSpecialCharacters(m.Password),
+		validateTotalNumberOfCharacters(m.Password),
+		validateNotIncludedWhiteSpaces(m.Password),
+		validateUcn(m.UCN))
+}
+
+type QueryModeratorDeleteCitizen struct {
 	CitizenId uuid.UUID `json:"citizen_id"`
 }
-type ModeratorGetCitizens struct {
+type ResponseModeratorGetCitizens struct {
 	ID         uuid.UUID `json:"id"`
 	FirstName  string    `json:"first_name"`
 	SecondName string    `json:"second_name"`

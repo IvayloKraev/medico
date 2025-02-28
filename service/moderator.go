@@ -21,9 +21,9 @@ type DoctorModeratorService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	CreateDoctor(createDoctor *dto.ModeratorCreateDoctor) error
-	DeleteDoctor(doctorId *dto.ModeratorDeleteDoctor) error
-	FindAllDoctors(dtoDoctors *[]dto.ModeratorGetDoctors) error
+	CreateDoctor(createDoctor *dto.RequestModeratorCreateDoctor) error
+	DeleteDoctor(doctorId *dto.QueryModeratorDeleteDoctor) error
+	FindAllDoctors(dtoDoctors *[]dto.ResponseModeratorGetDoctors) error
 }
 
 type doctorModeratorService struct {
@@ -38,7 +38,7 @@ func NewDoctorModeratorService() DoctorModeratorService {
 	}
 }
 
-func (m *doctorModeratorService) AuthenticateWithEmailAndPassword(email, password string) (uuid.UUID, error) {
+func (m *doctorModeratorService) AuthenticateWithEmailAndPassword(email, password string) (moderator uuid.UUID, err error) {
 	moderatorAuth := models.ModeratorAuth{}
 
 	if err := m.repo.FindAuthByEmail(email, &moderatorAuth); err != nil {
@@ -66,7 +66,7 @@ func (m *doctorModeratorService) DeleteAuthenticationSession(sessionID uuid.UUID
 	return m.authSession.DeleteAuthSession(sessionID)
 }
 
-func (m *doctorModeratorService) CreateDoctor(createDoctor *dto.ModeratorCreateDoctor) error {
+func (m *doctorModeratorService) CreateDoctor(createDoctor *dto.RequestModeratorCreateDoctor) error {
 	password, err := bcrypt.GenerateFromPassword([]byte(createDoctor.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -81,6 +81,7 @@ func (m *doctorModeratorService) CreateDoctor(createDoctor *dto.ModeratorCreateD
 			SecondName: createDoctor.SecondName,
 			LastName:   createDoctor.LastName,
 			UIN:        createDoctor.UIN,
+			Email:      createDoctor.Email,
 		},
 	}
 
@@ -90,20 +91,20 @@ func (m *doctorModeratorService) CreateDoctor(createDoctor *dto.ModeratorCreateD
 
 	return nil
 }
-func (m *doctorModeratorService) DeleteDoctor(doctorId *dto.ModeratorDeleteDoctor) error {
+func (m *doctorModeratorService) DeleteDoctor(doctorId *dto.QueryModeratorDeleteDoctor) error {
 	return m.repo.DeleteDoctor(doctorId.DoctorId)
 }
-func (m *doctorModeratorService) FindAllDoctors(dtoDoctors *[]dto.ModeratorGetDoctors) error {
+func (m *doctorModeratorService) FindAllDoctors(dtoDoctors *[]dto.ResponseModeratorGetDoctors) error {
 	var doctors []models.Doctor
 
 	if err := m.repo.FindAllDoctors(&doctors); err != nil {
 		return err
 	}
 
-	*dtoDoctors = make([]dto.ModeratorGetDoctors, len(doctors))
+	*dtoDoctors = make([]dto.ResponseModeratorGetDoctors, len(doctors))
 
 	for i, doc := range doctors {
-		(*dtoDoctors)[i] = dto.ModeratorGetDoctors{
+		(*dtoDoctors)[i] = dto.ResponseModeratorGetDoctors{
 			ID:         doc.ID,
 			FirstName:  doc.FirstName,
 			SecondName: doc.SecondName,
@@ -126,9 +127,9 @@ type PharmaModeratorService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	CreatePharmacyAndOwner(createPharmacy *dto.ModeratorCreatePharmacy) error
-	DeletePharmacy(pharmacyId *dto.ModeratorDeletePharmacy) error
-	FindAllPharmacies(dtoPharmacies *[]dto.ModeratorGetPharmacies) error
+	CreatePharmacyAndOwner(createPharmacy *dto.RequestModeratorCreatePharmacy) error
+	DeletePharmacy(pharmacyId *dto.QueryModeratorDeletePharmacy) error
+	FindAllPharmacies(dtoPharmacies *[]dto.ResponseModeratorGetPharmacies) error
 }
 
 type pharmaModeratorService struct {
@@ -171,7 +172,7 @@ func (m *pharmaModeratorService) DeleteAuthenticationSession(sessionID uuid.UUID
 	return m.authSession.DeleteAuthSession(sessionID)
 }
 
-func (m *pharmaModeratorService) CreatePharmacyAndOwner(createPharmacy *dto.ModeratorCreatePharmacy) error {
+func (m *pharmaModeratorService) CreatePharmacyAndOwner(createPharmacy *dto.RequestModeratorCreatePharmacy) error {
 	password, err := bcrypt.GenerateFromPassword([]byte(createPharmacy.OwnerPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -202,20 +203,20 @@ func (m *pharmaModeratorService) CreatePharmacyAndOwner(createPharmacy *dto.Mode
 
 	return nil
 }
-func (m *pharmaModeratorService) DeletePharmacy(pharmacyId *dto.ModeratorDeletePharmacy) error {
+func (m *pharmaModeratorService) DeletePharmacy(pharmacyId *dto.QueryModeratorDeletePharmacy) error {
 	return m.repo.DeletePharmacy(pharmacyId.PharmacyId)
 }
-func (m *pharmaModeratorService) FindAllPharmacies(dtoPharmacies *[]dto.ModeratorGetPharmacies) error {
+func (m *pharmaModeratorService) FindAllPharmacies(dtoPharmacies *[]dto.ResponseModeratorGetPharmacies) error {
 	var pharmacies []models.PharmacyBrand
 
 	if err := m.repo.FindAllPharmacies(&pharmacies); err != nil {
 		return err
 	}
 
-	*dtoPharmacies = make([]dto.ModeratorGetPharmacies, len(pharmacies))
+	*dtoPharmacies = make([]dto.ResponseModeratorGetPharmacies, len(pharmacies))
 
 	for i, pharmacy := range pharmacies {
-		(*dtoPharmacies)[i] = dto.ModeratorGetPharmacies{
+		(*dtoPharmacies)[i] = dto.ResponseModeratorGetPharmacies{
 			ID:        pharmacy.ID,
 			Name:      pharmacy.Name,
 			OwnerName: pharmacy.Owner.Name,
@@ -235,9 +236,9 @@ type MedicamentModeratorService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	CreateMedicament(createMedicament *dto.ModeratorCreateMedicament) error
-	DeleteMedicament(medicamentId *dto.ModeratorDeleteMedicament) error
-	FindAllMedicaments(dtoMedicaments *[]dto.ModeratorGetMedicaments) error
+	CreateMedicament(createMedicament *dto.RequestModeratorCreateMedicament) error
+	DeleteMedicament(medicamentId *dto.QueryModeratorDeleteMedicament) error
+	FindAllMedicaments(dtoMedicaments *[]dto.ResponseModeratorGetMedicaments) error
 }
 
 type medicamentModeratorService struct {
@@ -280,7 +281,7 @@ func (m *medicamentModeratorService) DeleteAuthenticationSession(sessionID uuid.
 	return m.authSession.DeleteAuthSession(sessionID)
 }
 
-func (m *medicamentModeratorService) CreateMedicament(createMedicament *dto.ModeratorCreateMedicament) error {
+func (m *medicamentModeratorService) CreateMedicament(createMedicament *dto.RequestModeratorCreateMedicament) error {
 	newMedicament := models.Medicament{
 		ID:                uuid.New(),
 		OfficialName:      createMedicament.OfficialName,
@@ -290,20 +291,20 @@ func (m *medicamentModeratorService) CreateMedicament(createMedicament *dto.Mode
 
 	return m.repo.CreateMedicament(&newMedicament)
 }
-func (m *medicamentModeratorService) DeleteMedicament(medicamentId *dto.ModeratorDeleteMedicament) error {
+func (m *medicamentModeratorService) DeleteMedicament(medicamentId *dto.QueryModeratorDeleteMedicament) error {
 	return m.repo.DeleteMedicament(medicamentId.MedicamentId)
 }
-func (m *medicamentModeratorService) FindAllMedicaments(dtoMedicaments *[]dto.ModeratorGetMedicaments) error {
+func (m *medicamentModeratorService) FindAllMedicaments(dtoMedicaments *[]dto.ResponseModeratorGetMedicaments) error {
 	var medicaments []models.Medicament
 
 	if err := m.repo.FindAllMedicaments(&medicaments); err != nil {
 		return err
 	}
 
-	*dtoMedicaments = make([]dto.ModeratorGetMedicaments, len(medicaments))
+	*dtoMedicaments = make([]dto.ResponseModeratorGetMedicaments, len(medicaments))
 
 	for i, medicament := range medicaments {
-		(*dtoMedicaments)[i] = dto.ModeratorGetMedicaments{
+		(*dtoMedicaments)[i] = dto.ResponseModeratorGetMedicaments{
 			ID:                medicament.ID,
 			OfficialName:      medicament.OfficialName,
 			ATC:               medicament.ATC,
@@ -324,9 +325,9 @@ type CitizenModeratorService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	CreateCitizen(createCitizen *dto.ModeratorCreateCitizen) error
-	DeleteCitizen(citizenId *dto.ModeratorDeleteCitizen) error
-	FindAllCitizens(dtoCitizens *[]dto.ModeratorGetCitizens) error
+	CreateCitizen(createCitizen *dto.RequestModeratorCreateCitizen) error
+	DeleteCitizen(citizenId *dto.QueryModeratorDeleteCitizen) error
+	FindAllCitizens(dtoCitizens *[]dto.ResponseModeratorGetCitizens) error
 }
 
 type citizenModeratorService struct {
@@ -369,7 +370,7 @@ func (m *citizenModeratorService) DeleteAuthenticationSession(sessionID uuid.UUI
 	return m.authSession.DeleteAuthSession(sessionID)
 }
 
-func (m *citizenModeratorService) CreateCitizen(createCitizen *dto.ModeratorCreateCitizen) error {
+func (m *citizenModeratorService) CreateCitizen(createCitizen *dto.RequestModeratorCreateCitizen) error {
 	password, err := bcrypt.GenerateFromPassword([]byte(createCitizen.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -395,20 +396,20 @@ func (m *citizenModeratorService) CreateCitizen(createCitizen *dto.ModeratorCrea
 
 	return nil
 }
-func (m *citizenModeratorService) DeleteCitizen(citizenId *dto.ModeratorDeleteCitizen) error {
+func (m *citizenModeratorService) DeleteCitizen(citizenId *dto.QueryModeratorDeleteCitizen) error {
 	return m.repo.DeleteCitizen(citizenId.CitizenId)
 }
-func (m *citizenModeratorService) FindAllCitizens(dtoCitizens *[]dto.ModeratorGetCitizens) error {
+func (m *citizenModeratorService) FindAllCitizens(dtoCitizens *[]dto.ResponseModeratorGetCitizens) error {
 	var citizens []models.Citizen
 
 	if err := m.repo.FindAllCitizens(&citizens); err != nil {
 		return err
 	}
 
-	*dtoCitizens = make([]dto.ModeratorGetCitizens, len(citizens))
+	*dtoCitizens = make([]dto.ResponseModeratorGetCitizens, len(citizens))
 
 	for i, citizen := range citizens {
-		(*dtoCitizens)[i] = dto.ModeratorGetCitizens{
+		(*dtoCitizens)[i] = dto.ResponseModeratorGetCitizens{
 			ID:         citizen.ID,
 			FirstName:  citizen.FirstName,
 			SecondName: citizen.SecondName,

@@ -2,6 +2,7 @@ package repo
 
 import (
 	"github.com/google/uuid"
+	"medico/common"
 	"medico/config"
 	"medico/models"
 )
@@ -32,7 +33,7 @@ func (m *doctorModeratorRepo) FindAuthByEmail(email string, moderator *models.Mo
 	return m.repo.First(moderator, "email = ?", email).Error
 }
 func (m *doctorModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
-	return m.repo.First(&moderator, "id = ? AND type = ?", id, models.DoctorMod).Error
+	return m.repo.First(&moderator, "id = ? AND type = ?", id, common.DoctorMod).Error
 }
 
 func (m *doctorModeratorRepo) CreateDoctor(doctorAuth *models.DoctorAuth) error {
@@ -73,7 +74,7 @@ func (m *pharmaModeratorRepo) FindAuthByEmail(email string, moderator *models.Mo
 	return m.repo.First(moderator, "email = ?", email).Error
 }
 func (m *pharmaModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
-	return m.repo.First(&moderator, "id = ? AND type = ?", id, models.PharmacyMod).Error
+	return m.repo.First(&moderator, "id = ? AND type = ?", id, common.PharmacyMod).Error
 }
 
 func (m *pharmaModeratorRepo) CreatePharmacyOwner(owner *models.PharmacyOwnerAuth) error {
@@ -118,7 +119,7 @@ func (m *medicamentModeratorRepo) FindAuthByEmail(email string, moderator *model
 	return m.repo.First(moderator, "email = ?", email).Error
 }
 func (m *medicamentModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
-	return m.repo.First(&moderator, "id = ? AND type = ?", id, models.MedicamentMod).Error
+	return m.repo.First(&moderator, "id = ? AND type = ?", id, common.MedicamentMod).Error
 }
 
 func (m *medicamentModeratorRepo) CreateMedicament(medicament *models.Medicament) error {
@@ -157,7 +158,7 @@ func (m *citizenModeratorRepo) FindAuthByEmail(email string, moderator *models.M
 	return m.repo.First(moderator, "email = ?", email).Error
 }
 func (m *citizenModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
-	return m.repo.First(&moderator, "id = ? AND type = ?", id, models.CitizenMod).Error
+	return m.repo.First(&moderator, "id = ? AND type = ?", id, common.CitizenMod).Error
 }
 
 func (m *citizenModeratorRepo) CreateCitizen(citizenAuth *models.CitizenAuth) error {

@@ -31,7 +31,7 @@ func NewDoctorController() DoctorController {
 }
 
 func (d doctorController) Login(ctx *fiber.Ctx) error {
-	doctorLogin := new(dto.DoctorLogin)
+	doctorLogin := new(dto.RequestDoctorLogin)
 
 	if err := ctx.BodyParser(&doctorLogin); err != nil {
 		return err
@@ -105,13 +105,13 @@ func (d doctorController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (d doctorController) GetCitizenInfo(ctx *fiber.Ctx) error {
-	citizenUcnDto := new(dto.DoctorGetCitizenInfo)
+	citizenUcnDto := new(dto.QueryDoctorGetCitizenInfo)
 
-	if err := ctx.BodyParser(&citizenUcnDto); err != nil {
+	if err := ctx.QueryParser(citizenUcnDto); err != nil {
 		return err
 	}
 
-	citizenInfoDto := new(dto.DoctorCitizenInfo)
+	citizenInfoDto := new(dto.ResponseDoctorCitizenInfo)
 
 	if err := d.service.GetCitizenInfo(ctx.Locals("doctorId").(uuid.UUID), citizenUcnDto.CitizenUcn, citizenInfoDto); err != nil {
 		return err
@@ -121,13 +121,13 @@ func (d doctorController) GetCitizenInfo(ctx *fiber.Ctx) error {
 }
 
 func (d doctorController) GetCitizenPrescriptions(ctx *fiber.Ctx) error {
-	citizenIdDto := new(dto.DoctorGetCitizenPrescription)
+	citizenIdDto := new(dto.QueryDoctorGetCitizenPrescription)
 
-	if err := ctx.BodyParser(&citizenIdDto); err != nil {
+	if err := ctx.QueryParser(citizenIdDto); err != nil {
 		return err
 	}
 
-	citizenPrescriptionDto := new([]dto.DoctorGetCitizenPrescriptionResponse)
+	citizenPrescriptionDto := new([]dto.ResponseDoctorGetCitizenPrescriptionResponse)
 
 	if err := d.service.GetCitizensPrescriptions(ctx.Locals("doctorId").(uuid.UUID), citizenIdDto.CitizenId, citizenPrescriptionDto); err != nil {
 		return err
@@ -137,7 +137,7 @@ func (d doctorController) GetCitizenPrescriptions(ctx *fiber.Ctx) error {
 }
 
 func (d doctorController) CreateCitizenPrescription(ctx *fiber.Ctx) error {
-	citizenPrescriptionDto := new(dto.DoctorCreatePrescription)
+	citizenPrescriptionDto := new(dto.RequestDoctorCreatePrescription)
 
 	if err := ctx.BodyParser(&citizenPrescriptionDto); err != nil {
 		return err

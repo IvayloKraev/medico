@@ -6,42 +6,45 @@ import (
 	"time"
 )
 
-type CitizenLogin struct {
-	Email    Email    `json:"email"`
-	Password Password `json:"password"`
+type RequestCitizenLogin struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-func (l CitizenLogin) Validate() error {
-	return errors.Join(l.Email.Validate(), l.Password.Validate())
+func (c *RequestCitizenLogin) Validate() error {
+	return errors.Join(
+		validateEmail(c.Email),
+		validateTotalNumberOfCharacters(c.Password))
 }
 
-type CitizenMedicalInfo struct {
-	FirstName      string    `json:"first_name"`
-	SecondName     string    `json:"second_name"`
-	LastName       string    `json:"last_name"`
-	BirthDate      time.Time `json:"birth_date"`
-	Sex            string    `json:"sex"`
-	UCN            string    `json:"ucn"`
-	PersonalDoctor struct {
-		FirstName  string `json:"first_name"`
-		SecondName string `json:"second_name"`
-		LastName   string `json:"last_name"`
-		UIN        string `json:"uin"`
-		Email      string `json:"email"`
-	} `json:"personal_doctor"`
+type ResponseCitizenMedicalInfo struct {
+	FirstName  string    `json:"first_name"`
+	SecondName string    `json:"second_name"`
+	LastName   string    `json:"last_name"`
+	BirthDate  time.Time `json:"birth_date"`
+	Sex        string    `json:"sex"`
+	UCN        string    `json:"ucn"`
 }
 
-type CitizenAvailablePharmacyGet struct {
+type ResponseCitizenPersonalDoctor struct {
+	FirstName  string `json:"first_name"`
+	SecondName string `json:"second_name"`
+	LastName   string `json:"last_name"`
+	UIN        string `json:"uin"`
+	Email      string `json:"email"`
+}
+
+type QueryCitizenAvailablePharmacyGet struct {
 	PrescriptionId uuid.UUID `json:"prescription_id"`
 }
 
-type CitizenAvailablePharmacy struct {
+type ResponseCitizenAvailablePharmacy struct {
 	Name      string  `json:"name"`
 	Latitude  float32 `json:"latitude"`
 	Longitude float32 `json:"longitude"`
 }
 
-type CitizenPrescription struct {
+type ResponseCitizenPrescription struct {
 	Doctor struct {
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`
