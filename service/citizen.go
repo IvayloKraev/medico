@@ -66,7 +66,7 @@ func (c *citizenService) GetMedicalInfo(citizenId uuid.UUID, medicalInfo *dto.Re
 		return err
 	}
 
-	medicalInfo = &dto.ResponseCitizenMedicalInfo{
+	*medicalInfo = dto.ResponseCitizenMedicalInfo{
 		FirstName:  citizen.FirstName,
 		SecondName: citizen.SecondName,
 		LastName:   citizen.LastName,
@@ -85,7 +85,7 @@ func (c *citizenService) GetPersonalDoctor(citizenId uuid.UUID, doctorDto *dto.R
 		return err
 	}
 
-	doctorDto = &dto.ResponseCitizenPersonalDoctor{
+	*doctorDto = dto.ResponseCitizenPersonalDoctor{
 		FirstName:  doctor.FirstName,
 		SecondName: doctor.SecondName,
 		LastName:   doctor.LastName,
@@ -139,7 +139,7 @@ func (c *citizenService) ListPrescriptions(citizenId uuid.UUID, prescriptionsDto
 			Medicaments: make([]struct {
 				Name string `json:"name"`
 				Unit uint   `json:"unit"`
-			}, 0),
+			}, len(prescription.Medicaments)),
 		}
 
 		for i2, medicament := range prescription.Medicaments {

@@ -32,7 +32,7 @@ func (c *citizenRepo) FindMedicalInfo(citizenId uuid.UUID, citizen *models.Citiz
 }
 
 func (c *citizenRepo) FindPersonalDoctor(citizenId uuid.UUID, doctor *models.Doctor) error {
-	return c.repo.Model(models.Doctor{}).Joins("citizens ON citizens.personal_doctorID = doctor.id").First(doctor, "id = ?", citizenId).Error
+	return c.repo.Model(models.Doctor{}).Joins("JOIN citizens ON citizens.personal_doctor_id = doctors.id").First(doctor, "citizens.id = ?", citizenId).Error
 }
 
 func (c *citizenRepo) FindAllPrescriptions(citizenId uuid.UUID, prescriptions *[]models.Prescription) error {

@@ -168,6 +168,8 @@ func setupCitizenRoute(router fiber.Router) {
 	citizenRoute.Use(citizen.VerifySession)
 	citizenRoute.Post("/login", citizen.Login)
 	citizenRoute.Post("/logout", citizen.Logout)
+	citizenRoute.Get("/medicalInfo", citizen.GetMedicalInfo)
+	citizenRoute.Get("/personalDoctor", citizen.GetPersonalDoctor)
 	citizenRoute.Get("/prescriptions", citizen.Prescription)
 	citizenRoute.Get("/available_pharmacies", citizen.AvailablePharmacies)
 }
