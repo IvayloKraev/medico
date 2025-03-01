@@ -40,9 +40,9 @@ func (c *citizenRepo) FindAllPrescriptions(citizenId uuid.UUID, prescriptions *[
 }
 
 func (c *citizenRepo) FindAvailablePharmacies(prescriptionId uuid.UUID, branches *[]models.PharmacyBranch) error {
-	return c.repo.Model(models.PharmacyBranchStorage{}).
-		Joins("LEFT JOIN pharmacy_branch ON pharmacy_branch.id = pharmacy_branch_storage.pharmacy_branch_id").
-		Joins("LEFT JOIN prescription_medicament ON pharmacy_branch_storage.medicament_id = prescription_medicament.medicament_id AND prescription_medicament.prescription_id = ?", prescriptionId).
-		Where("pharmacy_branch_storage.quantity > prescription_medicament.quantity").
+	return c.repo.Model(models.PharmacyBranch{}).
+		Joins("LEFT JOIN pharmacy_branch_storages ON pharmacy_branches.id = pharmacy_branch_storages.pharmacy_branch_id").
+		Joins("LEFT JOIN prescription_medicaments ON pharmacy_branch_storages.medicament_id = prescription_medicaments.medicament_id AND prescription_medicaments.prescription_id = ?", prescriptionId).
+		Where("pharmacy_branch_storages.quantity > prescription_medicaments.quantity").
 		Find(branches).Error
 }

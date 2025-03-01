@@ -35,7 +35,7 @@ type ResponseCitizenPersonalDoctor struct {
 }
 
 type QueryCitizenAvailablePharmacyGet struct {
-	PrescriptionId uuid.UUID `json:"prescription_id"`
+	PrescriptionId uuid.UUID `query:"prescription_id"`
 }
 
 type ResponseCitizenAvailablePharmacy struct {
@@ -45,6 +45,8 @@ type ResponseCitizenAvailablePharmacy struct {
 }
 
 type ResponseCitizenPrescription struct {
+	ID     uuid.UUID `json:"id"`
+	State  string    `json:"status"`
 	Doctor struct {
 		FirstName string `json:"first_name"`
 		LastName  string `json:"last_name"`

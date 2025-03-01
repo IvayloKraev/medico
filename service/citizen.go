@@ -102,7 +102,6 @@ func (c *citizenService) FindAllAvailablePharmacies(prescriptionId *dto.QueryCit
 	if err := c.citizenRepo.FindAvailablePharmacies(prescriptionId.PrescriptionId, branches); err != nil {
 		return err
 	}
-
 	*availablePharmacies = make([]dto.ResponseCitizenAvailablePharmacy, len(*branches))
 
 	for i, branch := range *branches {
@@ -127,6 +126,8 @@ func (c *citizenService) ListPrescriptions(citizenId uuid.UUID, prescriptionsDto
 
 	for i, prescription := range *prescriptions {
 		(*prescriptionsDto)[i] = dto.ResponseCitizenPrescription{
+			ID:    prescription.ID,
+			State: string(prescription.State),
 			Doctor: struct {
 				FirstName string `json:"first_name"`
 				LastName  string `json:"last_name"`
