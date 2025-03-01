@@ -1,6 +1,7 @@
 package dto
 
 import (
+	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
 	"medico/common"
@@ -11,6 +12,29 @@ type RequestAdminLogin struct {
 	Password string `json:"password"`
 }
 
+func (a *RequestAdminLogin) UnmarshalJSON(data []byte) (err error) {
+	type AliasRequestAdminLogin RequestAdminLogin
+
+	temp := new(AliasRequestAdminLogin)
+
+	err = json.Unmarshal(data, &temp)
+
+	if err != nil {
+		return ErrWrongData
+	}
+
+	a.Email = temp.Email
+	a.Password = temp.Password
+
+	err = a.Validate()
+	if err != nil {
+		a.Email = ""
+		a.Password = ""
+		return err
+	}
+
+	return nil
+}
 func (a *RequestAdminLogin) Validate() error {
 	return errors.Join(
 		validateEmail(a.Email),
