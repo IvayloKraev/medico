@@ -150,7 +150,7 @@ type PharmacistService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	GetCitizensActivePrescriptions(citizenUcn *dto.PharmacistCitizenPrescriptionGet, prescriptions *[]dto.ResponsePharmacistCitizenPrescription) error
+	GetCitizensActivePrescriptions(citizenUcn *dto.QueryPharmacistCitizenPrescriptionGet, prescriptions *[]dto.ResponsePharmacistCitizenPrescription) error
 	FulfillWholePrescription(data *dto.RequestPharmacistCitizenFulfillWholePrescription) error
 	FulfillMedicamentFromPrescription(data *dto.RequestPharmacistCitizenFulfillMedicamentFromPrescription) error
 
@@ -193,7 +193,7 @@ func (p pharmacistService) DeleteAuthenticationSession(sessionID uuid.UUID) erro
 	return p.authSession.DeleteAuthSession(sessionID)
 }
 
-func (p pharmacistService) GetCitizensActivePrescriptions(citizenUcn *dto.PharmacistCitizenPrescriptionGet, prescriptionsDto *[]dto.ResponsePharmacistCitizenPrescription) error {
+func (p pharmacistService) GetCitizensActivePrescriptions(citizenUcn *dto.QueryPharmacistCitizenPrescriptionGet, prescriptionsDto *[]dto.ResponsePharmacistCitizenPrescription) error {
 	prescriptions := new([]models.Prescription)
 
 	if err := p.repo.FindActivePrescriptionsByCitizenUcn(citizenUcn.CitizenUCN, prescriptions); err != nil {
@@ -204,10 +204,16 @@ func (p pharmacistService) GetCitizensActivePrescriptions(citizenUcn *dto.Pharma
 
 	for i, prescription := range *prescriptions {
 		(*prescriptionsDto)[i] = dto.ResponsePharmacistCitizenPrescription{
+			ID:           prescription.ID,
 			Name:         prescription.Name,
 			CreationDate: prescription.CreationDate,
 			StartDate:    prescription.StartDate,
 			EndDate:      prescription.EndDate,
+			Medicaments: make([]struct {
+				MedicamentName string `json:"medicament_name"`
+				Quantity       uint   `json:"quantity"`
+				Fulfilled      bool   `json:"fulfilled"`
+			}, len(prescription.Medicaments)),
 		}
 
 		for k, medicament := range prescription.Medicaments {
@@ -236,7 +242,7 @@ func (p pharmacistService) FulfillMedicamentFromPrescription(data *dto.RequestPh
 
 func (p pharmacistService) AddMedicamentToBranchStorage(data *dto.RequestPharmacistBranchAddMedicament) error {
 	for _, medicament := range data.Medicaments {
-		err := p.repo.AddMedicamentToBranchStorage(data.BranchId, medicament.BranchId, medicament.Quantity)
+		err := p.repo.AddMedicamentToBranchStorage(data.BranchId, medicament.MedicamentId, medicament.Quantity)
 		if err != nil {
 			return err
 		}

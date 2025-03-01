@@ -28,6 +28,11 @@ func SetupRoutes(app *fiber.App) {
 	setupDoctorRoutes(apiRoute)
 
 	setupCitizenRoute(apiRoute)
+
+	pharmacyRoute := apiRoute.Group("/pharmacy")
+
+	setupPharmacyOwnerRoute(pharmacyRoute)
+	setupPharmacistsRoute(pharmacyRoute)
 }
 
 func setupCORS(router fiber.Router) {
@@ -172,4 +177,30 @@ func setupCitizenRoute(router fiber.Router) {
 	citizenRoute.Get("/personalDoctor", citizen.GetPersonalDoctor)
 	citizenRoute.Get("/prescriptions", citizen.Prescription)
 	citizenRoute.Get("/available_pharmacies", citizen.AvailablePharmacies)
+}
+
+func setupPharmacyOwnerRoute(router fiber.Router) {
+	pharmacy := controllers.NewPharmacyOwnerController()
+
+	pharmacyRoute := router.Group("/owner")
+	pharmacyRoute.Use(pharmacy.VerifySession)
+	pharmacyRoute.Post("/login", pharmacy.Login)
+	pharmacyRoute.Post("/logout", pharmacy.Logout)
+	pharmacyRoute.Get("/branches", pharmacy.GetAllBranches)
+	pharmacyRoute.Get("/pharmacists", pharmacy.GetAllPharmacists)
+	pharmacyRoute.Post("/branch/new", pharmacy.NewPharmacyBranch)
+	pharmacyRoute.Post("/pharmacist/new", pharmacy.NewPharmacist)
+}
+
+func setupPharmacistsRoute(router fiber.Router) {
+	pharmacist := controllers.NewPharmacistController()
+
+	pharmacistRoute := router.Group("/pharmacist")
+	pharmacistRoute.Use(pharmacist.VerifySession)
+	pharmacistRoute.Post("/login", pharmacist.Login)
+	pharmacistRoute.Post("/logout", pharmacist.Logout)
+	pharmacistRoute.Get("/prescription/get", pharmacist.GetCitizenPrescription)
+	pharmacistRoute.Post("/prescription/fulfill", pharmacist.FulfillPrescription)
+	pharmacistRoute.Post("/prescription/fulfillMedicament", pharmacist.FulfillMedicamentFromPrescription)
+	pharmacistRoute.Post("/branch/addMedicament", pharmacist.AddMedicamentToBranchStorage)
 }

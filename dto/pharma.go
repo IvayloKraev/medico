@@ -72,8 +72,8 @@ func (p *RequestPharmacistAuth) Validate() error {
 		validateTotalNumberOfCharacters(p.Password))
 }
 
-type PharmacistCitizenPrescriptionGet struct {
-	CitizenUCN string `json:"citizen_ucn"`
+type QueryPharmacistCitizenPrescriptionGet struct {
+	CitizenUCN string `query:"citizen_ucn"`
 }
 
 type RequestPharmacistCitizenFulfillWholePrescription struct {
@@ -83,21 +83,22 @@ type RequestPharmacistCitizenFulfillWholePrescription struct {
 }
 
 type RequestPharmacistCitizenFulfillMedicamentFromPrescription struct {
-	CitizenId      uuid.UUID `json:"citizen_ucn"`
+	CitizenId      uuid.UUID `json:"citizen_id"`
 	PrescriptionId uuid.UUID `json:"prescription_id"`
-	MedicamentId   uuid.UUID `json:"medicament_ucn"`
+	MedicamentId   uuid.UUID `json:"medicament_id"`
 }
 
 type RequestPharmacistBranchAddMedicament struct {
 	BranchId    uuid.UUID `json:"branch_id"`
 	Medicaments []struct {
-		BranchId       uuid.UUID `json:"branch_id"`
+		MedicamentId   uuid.UUID `json:"medicament_id"`
 		MedicamentName string    `json:"medicament_name"`
 		Quantity       uint      `json:"quantity"`
 	} `json:"medicaments"`
 }
 
 type ResponsePharmacistCitizenPrescription struct {
+	ID           uuid.UUID `json:"id"`
 	Name         string    `json:"name"`
 	CreationDate time.Time `json:"creation_date"`
 	StartDate    time.Time `json:"start_date"`
