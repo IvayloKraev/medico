@@ -81,7 +81,7 @@ func (c *pharmacyOwnerController) Logout(ctx *fiber.Ctx) error {
 }
 
 func (c *pharmacyOwnerController) VerifySession(ctx *fiber.Ctx) error {
-	if ctx.Path() == "/api/pharma/owner/login" {
+	if ctx.Path() == "/api/pharmacy/owner/login" {
 		return ctx.Next()
 	}
 
@@ -177,13 +177,13 @@ func NewPharmacistController() PharmacistController {
 func (c *pharmacistController) Login(ctx *fiber.Ctx) error {
 	pharmacistLogin := new(dto.RequestPharmacistAuth)
 
-	if err := ctx.BodyParser(&pharmacistLogin); err != nil {
+	if err := ctx.BodyParser(pharmacistLogin); err != nil {
 		return err
 	}
 
 	pharmacistAuth := models.PharmacistAuth{}
 
-	if err := c.service.AuthenticateByEmailAndPassword(pharmacistAuth.Email, pharmacistAuth.Password, &pharmacistAuth); err != nil {
+	if err := c.service.AuthenticateByEmailAndPassword(pharmacistLogin.Email, pharmacistLogin.Password, &pharmacistAuth); err != nil {
 		return err
 	}
 
@@ -224,7 +224,7 @@ func (c *pharmacistController) Logout(ctx *fiber.Ctx) error {
 }
 
 func (c *pharmacistController) VerifySession(ctx *fiber.Ctx) error {
-	if ctx.Path() == "/api/pharma/pharmacist/login" {
+	if ctx.Path() == "/api/pharmacy/pharmacist/login" {
 		return ctx.Next()
 	}
 
@@ -248,8 +248,8 @@ func (c *pharmacistController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (c *pharmacistController) GetCitizenPrescription(ctx *fiber.Ctx) error {
-	citizenUcn := new(dto.PharmacistCitizenPrescriptionGet)
-	if err := ctx.BodyParser(&citizenUcn); err != nil {
+	citizenUcn := new(dto.QueryPharmacistCitizenPrescriptionGet)
+	if err := ctx.QueryParser(citizenUcn); err != nil {
 		return err
 	}
 
@@ -265,7 +265,7 @@ func (c *pharmacistController) GetCitizenPrescription(ctx *fiber.Ctx) error {
 func (c *pharmacistController) FulfillPrescription(ctx *fiber.Ctx) error {
 	input := new(dto.RequestPharmacistCitizenFulfillWholePrescription)
 
-	if err := ctx.BodyParser(&input); err != nil {
+	if err := ctx.BodyParser(input); err != nil {
 		return err
 	}
 
@@ -279,7 +279,7 @@ func (c *pharmacistController) FulfillPrescription(ctx *fiber.Ctx) error {
 func (c *pharmacistController) FulfillMedicamentFromPrescription(ctx *fiber.Ctx) error {
 	input := new(dto.RequestPharmacistCitizenFulfillMedicamentFromPrescription)
 
-	if err := ctx.BodyParser(&input); err != nil {
+	if err := ctx.BodyParser(input); err != nil {
 		return err
 	}
 
@@ -292,7 +292,7 @@ func (c *pharmacistController) FulfillMedicamentFromPrescription(ctx *fiber.Ctx)
 func (c *pharmacistController) AddMedicamentToBranchStorage(ctx *fiber.Ctx) error {
 	input := new(dto.RequestPharmacistBranchAddMedicament)
 
-	if err := ctx.BodyParser(&input); err != nil {
+	if err := ctx.BodyParser(input); err != nil {
 		return err
 	}
 	if err := c.service.AddMedicamentToBranchStorage(input); err != nil {

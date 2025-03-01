@@ -116,7 +116,7 @@ func validateUcn(ucn string) error {
 }
 
 func validateCoordinates(latitude, longitude float32) error {
-	if latitude < 0 && latitude > 180 && longitude < 0 && longitude > 180 {
+	if latitude < -90 && latitude > 90 && longitude < 0 && longitude > 180 {
 		return ErrCoordinatesInvalid
 	}
 	return nil

@@ -2,6 +2,7 @@ package repo
 
 import (
 	"errors"
+	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"medico/config"
@@ -51,8 +52,8 @@ func (p pharmacyOwnerRepo) FindPharmacyBranchesByBrandId(pharmacyBrandId uuid.UU
 
 func (p pharmacyOwnerRepo) FindPharmacyBranchesByOwnerId(pharmacyOwnerId uuid.UUID, pharmacyBranches *[]models.PharmacyBranch) error {
 	return p.repo.Model(models.PharmacyBranch{}).
-		InnerJoins("INNER JOINS pharmacy_brand ON pharmacy_branch.pharmacy_brand_id = pharmacy_brand.id").
-		Where("pharmacy_branch.owner_id = ?", pharmacyOwnerId).
+		InnerJoins("INNER JOIN pharmacy_brands ON pharmacy_branches.pharmacy_brand_id = pharmacy_brands.id").
+		Where("pharmacy_brands.owner_id = ?", pharmacyOwnerId).
 		Find(pharmacyBranches).Error
 }
 
@@ -62,9 +63,9 @@ func (p pharmacyOwnerRepo) FindPharmacistsByBranchID(pharmacyBranchId uuid.UUID,
 
 func (p pharmacyOwnerRepo) FindPharmacistsByPharmacyOwnerId(pharmacyOwnerId uuid.UUID, pharmacists *[]models.Pharmacist) error {
 	return p.repo.Model(models.Pharmacist{}).
-		InnerJoins("INNER JOIN pharmacy_branch ON pharmacist.pharmacy_branch_id = pharmacy_branch.id").
-		InnerJoins("INNER JOIN pharmacy_brand ON pharmacy_branch.pharmacy_brand_id = pharmacy_brand.id").
-		Where("pharmacy_brand.owner_id = ?", pharmacyOwnerId).
+		InnerJoins("INNER JOIN pharmacy_branches ON pharmacists.pharmacy_branch_id = pharmacy_branches.id").
+		InnerJoins("INNER JOIN pharmacy_brands ON pharmacy_branches.pharmacy_brand_id = pharmacy_brands.id").
+		Where("pharmacy_brands.owner_id = ?", pharmacyOwnerId).
 		Find(pharmacists).Error
 }
 
@@ -77,7 +78,7 @@ func (p pharmacyOwnerRepo) CreatePharmacist(pharmacist *models.PharmacistAuth) e
 }
 
 type PharmacistRepo interface {
-	FindAuthByEmail(email string, pharmacyOwner *models.PharmacistAuth) error
+	FindAuthByEmail(email string, pharmacist *models.PharmacistAuth) error
 
 	FindActivePrescriptionsByCitizenUcn(citizenUcn string, activePrescriptions *[]models.Prescription) error
 	FulfillWholePrescription(branchId, prescriptionId uuid.UUID) error
@@ -97,22 +98,23 @@ func NewPharmacistRepo() PharmacistRepo {
 	}
 }
 
-func (p pharmacistRepo) FindAuthByEmail(email string, pharmacyOwner *models.PharmacistAuth) error {
-	return p.repo.First(pharmacyOwner, "email = ?", email).Error
+func (p pharmacistRepo) FindAuthByEmail(email string, pharmacist *models.PharmacistAuth) error {
+	return p.repo.First(pharmacist, "email = ?", email).Error
 }
 
 func (p pharmacistRepo) FindActivePrescriptionsByCitizenUcn(citizenUcn string, activePrescriptions *[]models.Prescription) error {
-	return p.repo.
+	return p.repo.Preload("Medicaments.Medicament").
 		Where("citizen_id IN (?)", p.repo.
 			Model(models.Citizen{}).
 			Select("id").
-			Where("ucn = ?", citizenUcn).
-			Limit(1)).
+			Where("ucn = ?", citizenUcn)).
 		Where("state = ?", "active").
 		Find(activePrescriptions).Error
 }
 
 func (p pharmacistRepo) FulfillWholePrescription(branchId, prescriptionId uuid.UUID) error {
+
+	fmt.Println(branchId, prescriptionId)
 	return p.repo.Transaction(func(tx Repository) error {
 		return errors.Join(
 			tx.Model(models.Prescription{}).
@@ -124,9 +126,12 @@ func (p pharmacistRepo) FulfillWholePrescription(branchId, prescriptionId uuid.U
 				Update("fulfilled", true).Error,
 
 			tx.Model(models.PharmacyBranchStorage{}).
-				Joins("LEFT JOIN prescription_medicaments AS pm ON pm.medicament_id = pharmacy_branch_storages.medicament_id").
-				Where("pharmacy_branch_storages.branch_id = ?", branchId).
-				Update("pharmacy_branch_storages.quantity", gorm.Expr("pharmacy_branch_storages.quantity - pm.quantity")).Error,
+				Where("pharmacy_branch_storages.pharmacy_branch_id = ?", branchId).
+				Update("pharmacy_branch_storages.quantity",
+					gorm.Expr("pharmacy_branch_storages.quantity - (?)",
+						tx.Model(models.PrescriptionMedicament{}).
+							Select("quantity").
+							Where("prescription_id = ?", prescriptionId))).Error,
 		)
 	})
 }
