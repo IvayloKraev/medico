@@ -52,18 +52,15 @@ func setupCORS(router fiber.Router) {
 	}
 
 	allowedOrigins := []string{
-		"*",
+		"http://localhost:3000",
+		"medico.online",
 	}
 
 	router.Use(cors.New(cors.Config{
-		Next:             nil,
-		AllowOriginsFunc: nil,
 		AllowOrigins:     strings.Join(allowedOrigins, ","),
 		AllowMethods:     strings.Join(allowedMethods, ","),
 		AllowHeaders:     strings.Join(allowedHeaders, ","),
-		AllowCredentials: false,
-		ExposeHeaders:    "",
-		MaxAge:           0,
+		AllowCredentials: true,
 	}))
 }
 
