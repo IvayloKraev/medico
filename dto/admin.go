@@ -18,9 +18,9 @@ func (a *RequestAdminLogin) Validate() error {
 }
 
 type RequestAdminCreateModerator struct {
-	FirstName  string `json:"first_name"`
-	SecondName string `json:"second_name"`
-	LastName   string `json:"last_name"`
+	FirstName  string `json:"firstName"`
+	SecondName string `json:"secondName"`
+	LastName   string `json:"lastName"`
 	Email      string `json:"email"`
 	Password   string `json:"password"`
 	Type       string `json:"type"`
@@ -42,14 +42,14 @@ func (a *RequestAdminCreateModerator) Validate() error {
 }
 
 type QueryAdminDeleteModerator struct {
-	ModeratorId uuid.UUID `json:"moderatorId"`
+	ModeratorId uuid.UUID `query:"moderatorId"`
 }
 
 type ResponseAdminGetModerator struct {
 	ID         uuid.UUID            `json:"id"`
-	FirstName  string               `json:"first_name"`
-	SecondName string               `json:"second_name"`
-	LastName   string               `json:"last_name"`
+	FirstName  string               `json:"firstName"`
+	SecondName string               `json:"secondName"`
+	LastName   string               `json:"lastName"`
 	Email      string               `json:"email"`
 	Type       common.ModeratorType `json:"type"`
 }
