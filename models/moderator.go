@@ -18,5 +18,5 @@ type Moderator struct {
 	SecondName string
 	LastName   string
 	Email      string
-	Type       common.ModeratorType `gorm:"type:enum('doctorMod','citizenMod','pharmacyMod','medicamentMod');not null"`
+	Type       common.ModeratorType `gorm:"type:enum('doctor','citizen','pharmacy','medicament');not null"`
 }
