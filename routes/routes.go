@@ -14,11 +14,13 @@ func SetupRoutes(app *fiber.App) {
 	apiRoute := app.Group("/api")
 
 	setupCORS(apiRoute)
-	setupCSRF(apiRoute)
+	//setupCSRF(apiRoute)
 
 	setupAdminRoutes(apiRoute)
 
 	moderatorRoute := apiRoute.Group("/moderator")
+
+	setUpModeratorRoutes(moderatorRoute)
 
 	setupDoctorModeratorRoutes(moderatorRoute)
 	setupPharmaModeratorRoutes(moderatorRoute)
@@ -53,7 +55,7 @@ func setupCORS(router fiber.Router) {
 
 	allowedOrigins := []string{
 		"http://localhost:3000",
-		"medico.online",
+		"https://medico.online",
 	}
 
 	router.Use(cors.New(cors.Config{
@@ -62,6 +64,10 @@ func setupCORS(router fiber.Router) {
 		AllowHeaders:     strings.Join(allowedHeaders, ","),
 		AllowCredentials: true,
 	}))
+
+	router.Options("/*", func(c *fiber.Ctx) error {
+		return c.SendStatus(fiber.StatusOK)
+	})
 }
 
 func setupCSRF(router fiber.Router) {
@@ -81,7 +87,7 @@ func setupCSRF(router fiber.Router) {
 		Expiration:     csrfConfig.Expiration,
 	}))
 
-	router.Get("/csrf-token", func(c *fiber.Ctx) error {
+	router.Get("/csrf/get", func(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusOK).JSON(nil)
 	})
 }
@@ -98,13 +104,18 @@ func setupAdminRoutes(router fiber.Router) {
 	adminRoute.Delete("/moderator/delete", admin.DeleteModerator)
 }
 
+func setUpModeratorRoutes(moderatorRoute fiber.Router) {
+	moderator := controllers.NewModeratorController()
+
+	moderatorRoute.Post("/login", moderator.Login)
+	moderatorRoute.Post("/logout", moderator.Logout)
+}
+
 func setupDoctorModeratorRoutes(moderatorRoute fiber.Router) {
 	doctorModerator := controllers.NewDoctorModeratorController()
 
 	doctorModeratorRoute := moderatorRoute.Group("/doctor")
 	doctorModeratorRoute.Use(doctorModerator.VerifySession)
-	doctorModeratorRoute.Post("/login", doctorModerator.Login)
-	doctorModeratorRoute.Post("/logout", doctorModerator.Logout)
 
 	doctorModeratorRoute.Get("/get", doctorModerator.GetDoctors)
 	doctorModeratorRoute.Post("/create", doctorModerator.AddDoctor)
@@ -116,8 +127,6 @@ func setupPharmaModeratorRoutes(moderatorRoute fiber.Router) {
 
 	pharmaModeratorRoute := moderatorRoute.Group("/pharma")
 	pharmaModeratorRoute.Use(pharmaModerator.VerifySession)
-	pharmaModeratorRoute.Post("/login", pharmaModerator.Login)
-	pharmaModeratorRoute.Post("/logout", pharmaModerator.Logout)
 
 	pharmaModeratorRoute.Get("/get", pharmaModerator.GetPharmacies)
 	pharmaModeratorRoute.Post("/create", pharmaModerator.AddPharmacy)
@@ -129,8 +138,6 @@ func setupMedicamentModeratorRoutes(moderatorRoute fiber.Router) {
 
 	medicamentModeratorRoute := moderatorRoute.Group("/medicament")
 	medicamentModeratorRoute.Use(medicamentModerator.VerifySession)
-	medicamentModeratorRoute.Post("/login", medicamentModerator.Login)
-	medicamentModeratorRoute.Post("/logout", medicamentModerator.Logout)
 
 	medicamentModeratorRoute.Get("/get", medicamentModerator.GetMedicaments)
 	medicamentModeratorRoute.Post("/create", medicamentModerator.AddMedicament)
@@ -142,8 +149,6 @@ func setupCitizenModeratorRoutes(moderatorRoute fiber.Router) {
 
 	citizenModeratorRoute := moderatorRoute.Group("/citizen")
 	citizenModeratorRoute.Use(citizenModerator.VerifySession)
-	citizenModeratorRoute.Post("/login", citizenModerator.Login)
-	citizenModeratorRoute.Post("/logout", citizenModerator.Logout)
 
 	citizenModeratorRoute.Get("/get", citizenModerator.GetCitizens)
 	citizenModeratorRoute.Post("/create", citizenModerator.AddCitizen)

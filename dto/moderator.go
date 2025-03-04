@@ -17,9 +17,9 @@ func (m *RequestModeratorLogin) Validate() error {
 }
 
 type RequestModeratorCreateDoctor struct {
-	FirstName  string `json:"first_name"`
-	SecondName string `json:"second_name"`
-	LastName   string `json:"last_name"`
+	FirstName  string `json:"firstName"`
+	SecondName string `json:"secondName"`
+	LastName   string `json:"lastName"`
 	UIN        string `json:"uin"`
 	Email      string `json:"email"`
 	Password   string `json:"password"`
@@ -41,22 +41,24 @@ func (m *RequestModeratorCreateDoctor) Validate() error {
 }
 
 type QueryModeratorDeleteDoctor struct {
-	DoctorId uuid.UUID `json:"doctor_id"`
+	DoctorId uuid.UUID `json:"doctorId"`
 }
 
 type ResponseModeratorGetDoctors struct {
 	ID         uuid.UUID `json:"id"`
-	FirstName  string    `json:"first_name"`
-	SecondName string    `json:"second_name"`
-	LastName   string    `json:"last_name"`
+	FirstName  string    `json:"firstName"`
+	SecondName string    `json:"secondName"`
+	LastName   string    `json:"lastName"`
 	UIN        string    `json:"uin"`
 	Email      string    `json:"email"`
 }
 
 type RequestModeratorCreateMedicament struct {
-	OfficialName      string   `json:"official_name"`
-	ActiveIngredients []string `json:"active_ingredients"`
-	ATC               string   `json:"atc"`
+	OfficialName      string `json:"name"`
+	ActiveIngredients []struct {
+		Name string `json:"value"`
+	} `json:"activeIngredients"`
+	ATC string `json:"atc"`
 }
 
 func (m *RequestModeratorCreateMedicament) Validate() error {
@@ -66,20 +68,20 @@ func (m *RequestModeratorCreateMedicament) Validate() error {
 }
 
 type QueryModeratorDeleteMedicament struct {
-	MedicamentId uuid.UUID `json:"medicament_id"`
+	MedicamentId uuid.UUID `json:"medicamentId"`
 }
 type ResponseModeratorGetMedicaments struct {
 	ID                uuid.UUID `json:"id"`
-	OfficialName      string    `json:"official_name"`
-	ActiveIngredients []string  `json:"active_ingredients"`
+	OfficialName      string    `json:"name"`
+	ActiveIngredients []string  `json:"activeIngredients"`
 	ATC               string    `json:"atc"`
 }
 
 type RequestModeratorCreatePharmacy struct {
 	Name          string `json:"name"`
-	OwnerName     string `json:"owner_name"`
-	OwnerEmail    string `json:"owner_email"`
-	OwnerPassword string `json:"owner_password"`
+	OwnerName     string `json:"ownerName"`
+	OwnerEmail    string `json:"ownerEmail"`
+	OwnerPassword string `json:"ownerPassword"`
 }
 
 func (m *RequestModeratorCreatePharmacy) Validate() error {
@@ -96,18 +98,18 @@ func (m *RequestModeratorCreatePharmacy) Validate() error {
 }
 
 type QueryModeratorDeletePharmacy struct {
-	PharmacyId uuid.UUID `json:"pharmacy_id"`
+	PharmacyId uuid.UUID `json:"pharmacyId"`
 }
 type ResponseModeratorGetPharmacies struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
-	OwnerName string    `json:"pharmacy_owner"`
+	OwnerName string    `json:"ownerName"`
 }
 
 type RequestModeratorCreateCitizen struct {
-	FirstName        string    `json:"first_name"`
-	SecondName       string    `json:"second_name"`
-	LastName         string    `json:"last_name"`
+	FirstName        string    `json:"firstName"`
+	SecondName       string    `json:"secondName"`
+	LastName         string    `json:"lastName"`
 	UCN              string    `json:"ucn"`
 	Email            string    `json:"email"`
 	Password         string    `json:"password"`
@@ -130,12 +132,12 @@ func (m *RequestModeratorCreateCitizen) Validate() error {
 }
 
 type QueryModeratorDeleteCitizen struct {
-	CitizenId uuid.UUID `json:"citizen_id"`
+	CitizenId uuid.UUID `json:"citizenId"`
 }
 type ResponseModeratorGetCitizens struct {
 	ID         uuid.UUID `json:"id"`
-	FirstName  string    `json:"first_name"`
-	SecondName string    `json:"second_name"`
-	LastName   string    `json:"last_name"`
+	FirstName  string    `json:"firstName"`
+	SecondName string    `json:"secondName"`
+	LastName   string    `json:"lastName"`
 	UCN        string    `json:"ucn"`
 }

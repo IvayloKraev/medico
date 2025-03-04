@@ -2,15 +2,35 @@ package repo
 
 import (
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 	"medico/common"
 	"medico/config"
 	"medico/models"
 )
 
+type ModeratorRepo interface {
+	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
+}
+
+type moderatorRepo struct {
+	db *gorm.DB
+}
+
+func NewModeratorRepo() ModeratorRepo {
+	connection, err := createConnection(config.LoadDatabaseConfig())
+	if err != nil {
+		panic(err)
+	}
+	return &moderatorRepo{db: connection}
+}
+
+func (m moderatorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
+	return m.db.Preload("Moderator").Find(&moderator, "email = ?", email).Error
+}
+
 // DOCTOR
 
 type DoctorModeratorRepo interface {
-	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
 	FindById(id uuid.UUID, moderator *models.Moderator) error
 
 	CreateDoctor(doctorAuth *models.DoctorAuth) error
@@ -29,9 +49,6 @@ func NewDoctorModeratorRepo() DoctorModeratorRepo {
 	}
 }
 
-func (m *doctorModeratorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
-	return m.repo.First(moderator, "email = ?", email).Error
-}
 func (m *doctorModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
 	return m.repo.First(&moderator, "id = ? AND type = ?", id, common.DoctorMod).Error
 }
@@ -49,7 +66,6 @@ func (m *doctorModeratorRepo) FindAllDoctors(doctors *[]models.Doctor) error {
 // PHARMA
 
 type PharmaModeratorRepo interface {
-	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
 	FindById(id uuid.UUID, moderator *models.Moderator) error
 
 	CreatePharmacyOwner(owner *models.PharmacyOwnerAuth) error
@@ -70,9 +86,6 @@ func NewPharmaModeratorRepo() PharmaModeratorRepo {
 	}
 }
 
-func (m *pharmaModeratorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
-	return m.repo.First(moderator, "email = ?", email).Error
-}
 func (m *pharmaModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
 	return m.repo.First(&moderator, "id = ? AND type = ?", id, common.PharmacyMod).Error
 }
@@ -96,7 +109,6 @@ func (m *pharmaModeratorRepo) FindAllPharmacies(pharmacies *[]models.PharmacyBra
 // MEDICAMENT
 
 type MedicamentModeratorRepo interface {
-	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
 	FindById(id uuid.UUID, moderator *models.Moderator) error
 
 	CreateMedicament(medicament *models.Medicament) error
@@ -115,9 +127,6 @@ func NewMedicamentModeratorRepo() MedicamentModeratorRepo {
 	}
 }
 
-func (m *medicamentModeratorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
-	return m.repo.First(moderator, "email = ?", email).Error
-}
 func (m *medicamentModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
 	return m.repo.First(&moderator, "id = ? AND type = ?", id, common.MedicamentMod).Error
 }
@@ -135,7 +144,6 @@ func (m *medicamentModeratorRepo) FindAllMedicaments(medicaments *[]models.Medic
 // CITIZEN
 
 type CitizenModeratorRepo interface {
-	FindAuthByEmail(email string, moderator *models.ModeratorAuth) error
 	FindById(id uuid.UUID, moderator *models.Moderator) error
 
 	CreateCitizen(citizenAuth *models.CitizenAuth) error
@@ -154,9 +162,6 @@ func NewCitizenModeratorRepo() CitizenModeratorRepo {
 	}
 }
 
-func (m *citizenModeratorRepo) FindAuthByEmail(email string, moderator *models.ModeratorAuth) error {
-	return m.repo.First(moderator, "email = ?", email).Error
-}
 func (m *citizenModeratorRepo) FindById(id uuid.UUID, moderator *models.Moderator) error {
 	return m.repo.First(&moderator, "id = ? AND type = ?", id, common.CitizenMod).Error
 }

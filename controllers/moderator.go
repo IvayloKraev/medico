@@ -5,16 +5,72 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"medico/dto"
-	"medico/models"
 	"medico/service"
 	"time"
 )
 
+type ModeratorController interface {
+	Login(ctx *fiber.Ctx) error
+	Logout(ctx *fiber.Ctx) error
+}
+
+type moderatorController struct {
+	service service.ModeratorService
+}
+
+func NewModeratorController() ModeratorController {
+	return &moderatorController{
+		service: service.NewModeratorService(),
+	}
+}
+
+func (m *moderatorController) Login(ctx *fiber.Ctx) error {
+	moderatorLogin := new(dto.RequestModeratorLogin)
+
+	if err := ctx.BodyParser(moderatorLogin); err != nil {
+		return err
+	}
+
+	moderatorId, moderatorType, err := m.service.Authenticate(moderatorLogin)
+	if err != nil {
+		return err
+	}
+
+	session, expiry, err := m.service.CreateAuthenticationSession(moderatorType, moderatorId)
+	if err != nil {
+		return err
+	}
+
+	ctx.Cookie(&fiber.Cookie{
+		Name:    "medico_session",
+		Value:   session.String(),
+		Expires: time.Now().Add(expiry),
+	})
+
+	return ctx.Status(fiber.StatusOK).JSON(moderatorType)
+}
+
+func (m *moderatorController) Logout(ctx *fiber.Ctx) error {
+	sessionId, err := uuid.Parse(ctx.Cookies("medico_session"))
+	if err != nil {
+		return err
+	}
+
+	if err := m.service.DeleteAuthenticationSession(sessionId); err != nil {
+		return err
+	}
+
+	ctx.Cookie(&fiber.Cookie{
+		Name:    "medico_session",
+		Expires: time.Now().Add(-(time.Hour * 2)),
+	})
+
+	return ctx.Status(200).JSON(nil)
+}
+
 // DOCTOR
 
 type DoctorModeratorController interface {
-	Login(ctx *fiber.Ctx) error
-	Logout(ctx *fiber.Ctx) error
 	VerifySession(ctx *fiber.Ctx) error
 
 	GetDoctors(ctx *fiber.Ctx) error
@@ -32,52 +88,6 @@ func NewDoctorModeratorController() DoctorModeratorController {
 	}
 }
 
-func (m *doctorModeratorController) Login(ctx *fiber.Ctx) error {
-	moderatorLogin := new(dto.RequestModeratorLogin)
-
-	if err := ctx.BodyParser(moderatorLogin); err != nil {
-		return err
-	}
-
-	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email, moderatorLogin.Password)
-	if err != nil {
-		return err
-	}
-
-	session, expiry, err := m.service.CreateAuthenticationSession(moderatorId)
-	if err != nil {
-		return err
-	}
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "medico_session",
-		Value:   session.String(),
-		Expires: time.Now().Add(expiry),
-	})
-
-	return ctx.Status(fiber.StatusOK).JSON(nil)
-}
-func (m *doctorModeratorController) Logout(ctx *fiber.Ctx) error {
-	sessionId, err := uuid.Parse(ctx.Cookies("medico_session", uuid.Nil.String()))
-	if err != nil {
-		return err
-	}
-
-	if sessionId == uuid.Nil {
-		return errors.New("not logged in")
-	}
-
-	if err := m.service.DeleteAuthenticationSession(sessionId); err != nil {
-		return err
-	}
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "medico_session",
-		Expires: time.Now().Add(-(time.Hour * 2)),
-	})
-
-	return ctx.Status(200).JSON(nil)
-}
 func (m *doctorModeratorController) VerifySession(ctx *fiber.Ctx) error {
 	if ctx.Path() == "/api/moderator/doctor/login" {
 		return ctx.Next()
@@ -142,8 +152,6 @@ func (m *doctorModeratorController) DeleteDoctor(ctx *fiber.Ctx) error {
 // PHARMA
 
 type PharmaModeratorController interface {
-	Login(ctx *fiber.Ctx) error
-	Logout(ctx *fiber.Ctx) error
 	VerifySession(ctx *fiber.Ctx) error
 
 	GetPharmacies(ctx *fiber.Ctx) error
@@ -161,57 +169,6 @@ func NewPharmaModeratorController() PharmaModeratorController {
 	}
 }
 
-func (m *pharmaModeratorController) Login(ctx *fiber.Ctx) error {
-	moderatorLogin := new(dto.RequestModeratorLogin)
-
-	if err := ctx.BodyParser(moderatorLogin); err != nil {
-		return err
-	}
-
-	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email, moderatorLogin.Password)
-	if err != nil {
-		return err
-	}
-
-	moderator := models.Moderator{}
-	if err := m.service.GetModeratorDetails(moderatorId, &moderator); err != nil {
-		return err
-	}
-
-	session, expiry, err := m.service.CreateAuthenticationSession(moderatorId)
-	if err != nil {
-		return err
-	}
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "medico_session",
-		Value:   session.String(),
-		Expires: time.Now().Add(expiry),
-	})
-
-	return ctx.Status(fiber.StatusOK).JSON(nil)
-}
-func (m *pharmaModeratorController) Logout(ctx *fiber.Ctx) error {
-	sessionId, err := uuid.Parse(ctx.Cookies("medico_session", uuid.Nil.String()))
-	if err != nil {
-		return err
-	}
-
-	if sessionId == uuid.Nil {
-		return errors.New("not logged in")
-	}
-
-	if err := m.service.DeleteAuthenticationSession(sessionId); err != nil {
-		return err
-	}
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "medico_session",
-		Expires: time.Now().Add(-(time.Hour * 2)),
-	})
-
-	return ctx.Status(200).JSON(nil)
-}
 func (m *pharmaModeratorController) VerifySession(ctx *fiber.Ctx) error {
 	if ctx.Path() == "/api/moderator/pharma/login" {
 		return ctx.Next()
@@ -276,8 +233,6 @@ func (m *pharmaModeratorController) DeletePharmacy(ctx *fiber.Ctx) error {
 // MEDICAMENT
 
 type MedicamentModeratorController interface {
-	Login(ctx *fiber.Ctx) error
-	Logout(ctx *fiber.Ctx) error
 	VerifySession(ctx *fiber.Ctx) error
 
 	GetMedicaments(ctx *fiber.Ctx) error
@@ -295,57 +250,6 @@ func NewMedicamentModeratorController() MedicamentModeratorController {
 	}
 }
 
-func (m *medicamentModeratorController) Login(ctx *fiber.Ctx) error {
-	moderatorLogin := new(dto.RequestModeratorLogin)
-
-	if err := ctx.BodyParser(moderatorLogin); err != nil {
-		return err
-	}
-
-	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email, moderatorLogin.Password)
-	if err != nil {
-		return err
-	}
-
-	moderator := models.Moderator{}
-	if err := m.service.GetModeratorDetails(moderatorId, &moderator); err != nil {
-		return err
-	}
-
-	session, expiry, err := m.service.CreateAuthenticationSession(moderatorId)
-	if err != nil {
-		return err
-	}
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "medico_session",
-		Value:   session.String(),
-		Expires: time.Now().Add(expiry),
-	})
-
-	return ctx.Status(fiber.StatusOK).JSON(nil)
-}
-func (m *medicamentModeratorController) Logout(ctx *fiber.Ctx) error {
-	sessionId, err := uuid.Parse(ctx.Cookies("medico_session", uuid.Nil.String()))
-	if err != nil {
-		return err
-	}
-
-	if sessionId == uuid.Nil {
-		return errors.New("not logged in")
-	}
-
-	if err := m.service.DeleteAuthenticationSession(sessionId); err != nil {
-		return err
-	}
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "medico_session",
-		Expires: time.Now().Add(-(time.Hour * 2)),
-	})
-
-	return ctx.Status(200).JSON(nil)
-}
 func (m *medicamentModeratorController) VerifySession(ctx *fiber.Ctx) error {
 	if ctx.Path() == "/api/moderator/medicament/login" {
 		return ctx.Next()
@@ -410,8 +314,6 @@ func (m *medicamentModeratorController) DeleteMedicament(ctx *fiber.Ctx) error {
 // CITIZEN
 
 type CitizenModeratorController interface {
-	Login(ctx *fiber.Ctx) error
-	Logout(ctx *fiber.Ctx) error
 	VerifySession(ctx *fiber.Ctx) error
 
 	GetCitizens(ctx *fiber.Ctx) error
@@ -429,57 +331,6 @@ func NewCitizenModeratorController() CitizenModeratorController {
 	}
 }
 
-func (m *citizenModeratorController) Login(ctx *fiber.Ctx) error {
-	moderatorLogin := new(dto.RequestModeratorLogin)
-
-	if err := ctx.BodyParser(moderatorLogin); err != nil {
-		return err
-	}
-
-	moderatorId, err := m.service.AuthenticateWithEmailAndPassword(moderatorLogin.Email, moderatorLogin.Password)
-	if err != nil {
-		return err
-	}
-
-	moderator := models.Moderator{}
-	if err := m.service.GetModeratorDetails(moderatorId, &moderator); err != nil {
-		return err
-	}
-
-	session, expiry, err := m.service.CreateAuthenticationSession(moderatorId)
-	if err != nil {
-		return err
-	}
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "medico_session",
-		Value:   session.String(),
-		Expires: time.Now().Add(expiry),
-	})
-
-	return ctx.Status(fiber.StatusOK).JSON(nil)
-}
-func (m *citizenModeratorController) Logout(ctx *fiber.Ctx) error {
-	sessionId, err := uuid.Parse(ctx.Cookies("medico_session", uuid.Nil.String()))
-	if err != nil {
-		return err
-	}
-
-	if sessionId == uuid.Nil {
-		return errors.New("not logged in")
-	}
-
-	if err := m.service.DeleteAuthenticationSession(sessionId); err != nil {
-		return err
-	}
-
-	ctx.Cookie(&fiber.Cookie{
-		Name:    "medico_session",
-		Expires: time.Now().Add(-(time.Hour * 2)),
-	})
-
-	return ctx.Status(200).JSON(nil)
-}
 func (m *citizenModeratorController) VerifySession(ctx *fiber.Ctx) error {
 	if ctx.Path() == "/api/moderator/citizen/login" {
 		return ctx.Next()

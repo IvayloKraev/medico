@@ -2,7 +2,6 @@ package repo
 
 import (
 	"errors"
-	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"medico/config"
@@ -113,8 +112,6 @@ func (p pharmacistRepo) FindActivePrescriptionsByCitizenUcn(citizenUcn string, a
 }
 
 func (p pharmacistRepo) FulfillWholePrescription(branchId, prescriptionId uuid.UUID) error {
-
-	fmt.Println(branchId, prescriptionId)
 	return p.repo.Transaction(func(tx Repository) error {
 		return errors.Join(
 			tx.Model(models.Prescription{}).
