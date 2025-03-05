@@ -164,6 +164,7 @@ func setupDoctorRoutes(route fiber.Router) {
 	doctorRoute.Post("/logout", doctor.Logout)
 
 	doctorRoute.Get("/citizen/info", doctor.GetCitizenInfo)
+	doctorRoute.Get("/citizens/ucn", doctor.GetListOfCitizensViaCommonUCN)
 	doctorRoute.Get("/citizen/prescription", doctor.GetCitizenPrescriptions)
 	doctorRoute.Post("/citizen/prescription", doctor.CreateCitizenPrescription)
 }
@@ -178,7 +179,7 @@ func setupCitizenRoute(router fiber.Router) {
 	citizenRoute.Get("/medicalInfo", citizen.GetMedicalInfo)
 	citizenRoute.Get("/personalDoctor", citizen.GetPersonalDoctor)
 	citizenRoute.Get("/prescriptions", citizen.Prescription)
-	citizenRoute.Get("/available_pharmacies", citizen.AvailablePharmacies)
+	citizenRoute.Get("/availablePharmacies", citizen.AvailablePharmacies)
 }
 
 func setupPharmacyOwnerRoute(router fiber.Router) {

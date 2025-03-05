@@ -18,11 +18,11 @@ func (d *RequestDoctorLogin) Validate() error {
 }
 
 type RequestDoctorCreatePrescription struct {
-	CitizenId   uuid.UUID `json:"citizen_id"`
+	CitizenId   uuid.UUID `json:"citizenId"`
 	Name        string    `json:"name"`
 	EndDate     time.Time `json:"end_date"`
 	Medicaments []struct {
-		OfficialName string `json:"official_name"`
+		OfficialName string `json:"officialName"`
 		Quantity     uint   `json:"quantity"`
 	} `json:"medicaments"`
 }
@@ -34,31 +34,37 @@ func (d *RequestDoctorCreatePrescription) Validate() error {
 }
 
 type QueryDoctorGetCitizenInfo struct {
-	CitizenUcn string `json:"citizen_ucn"`
+	CitizenUcn string `json:"citizenUcn"`
+}
+
+type ResponseListOfCitizensViaCommonUCN struct {
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	UCN       string `json:"ucn"`
 }
 
 type QueryDoctorGetCitizenPrescription struct {
-	CitizenId uuid.UUID `json:"citizen_id"`
+	CitizenId uuid.UUID `json:"citizenId"`
 }
 
 type ResponseDoctorCitizenInfo struct {
 	ID         uuid.UUID `json:"id"`
-	FirstName  string    `json:"first_name"`
-	SecondName string    `json:"second_name"`
-	LastName   string    `json:"last_name"`
-	BirthDate  time.Time `json:"birth_date"`
+	FirstName  string    `json:"firstName"`
+	SecondName string    `json:"secondName"`
+	LastName   string    `json:"lastName"`
+	BirthDate  time.Time `json:"birthDate"`
 	Email      string    `json:"email"`
 }
 
-type ResponseDoctorGetCitizenPrescriptionResponse struct {
+type ResponseDoctorGetCitizenPrescription struct {
 	Id          uuid.UUID `json:"id"`
-	Name        string
+	Name        string    `json:"name"`
 	Medicaments []struct {
-		OfficialName string `json:"official_name"`
+		OfficialName string `json:"officialName"`
 		Quantity     uint   `json:"quantity"`
 	} `json:"medicaments"`
-	State       string
-	CreatedDate time.Time `json:"created_date"`
-	StartDate   time.Time `json:"start_date"`
-	EndDate     time.Time `json:"end_date"`
+	State       string    `json:"status"`
+	CreatedDate time.Time `json:"createdDate"`
+	StartDate   time.Time `json:"startDate"`
+	EndDate     time.Time `json:"endDate"`
 }

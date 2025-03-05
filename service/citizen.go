@@ -73,6 +73,7 @@ func (c *citizenService) GetMedicalInfo(citizenId uuid.UUID, medicalInfo *dto.Re
 		BirthDate:  citizen.Birthday,
 		Sex:        string(citizen.Sex),
 		UCN:        citizen.UCN,
+		Email:      citizen.Email,
 	}
 
 	return nil
@@ -126,11 +127,13 @@ func (c *citizenService) ListPrescriptions(citizenId uuid.UUID, prescriptionsDto
 
 	for i, prescription := range *prescriptions {
 		(*prescriptionsDto)[i] = dto.ResponseCitizenPrescription{
-			ID:    prescription.ID,
-			State: string(prescription.State),
+			ID:        prescription.ID,
+			Name:      prescription.Name,
+			State:     string(prescription.State),
+			StartDate: prescription.StartDate,
 			Doctor: struct {
-				FirstName string `json:"first_name"`
-				LastName  string `json:"last_name"`
+				FirstName string `json:"firstName"`
+				LastName  string `json:"lastName"`
 				UIN       string `json:"uin"`
 			}{
 				FirstName: prescription.Doctor.FirstName,
@@ -138,18 +141,18 @@ func (c *citizenService) ListPrescriptions(citizenId uuid.UUID, prescriptionsDto
 				UIN:       prescription.Doctor.UIN,
 			},
 			Medicaments: make([]struct {
-				Name string `json:"name"`
-				Unit uint   `json:"unit"`
+				Name     string `json:"name"`
+				Quantity uint   `json:"quantity"`
 			}, len(prescription.Medicaments)),
 		}
 
 		for i2, medicament := range prescription.Medicaments {
 			(*prescriptionsDto)[i].Medicaments[i2] = struct {
-				Name string `json:"name"`
-				Unit uint   `json:"unit"`
+				Name     string `json:"name"`
+				Quantity uint   `json:"quantity"`
 			}{
-				Name: medicament.Medicament.OfficialName,
-				Unit: medicament.Quantity,
+				Name:     medicament.Medicament.OfficialName,
+				Quantity: medicament.Quantity,
 			}
 		}
 	}

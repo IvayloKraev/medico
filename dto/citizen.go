@@ -18,12 +18,13 @@ func (c *RequestCitizenLogin) Validate() error {
 }
 
 type ResponseCitizenMedicalInfo struct {
-	FirstName  string    `json:"first_name"`
-	SecondName string    `json:"second_name"`
-	LastName   string    `json:"last_name"`
-	BirthDate  time.Time `json:"birth_date"`
+	FirstName  string    `json:"firstName"`
+	SecondName string    `json:"secondName"`
+	LastName   string    `json:"lastName"`
+	BirthDate  time.Time `json:"birthDate"`
 	Sex        string    `json:"sex"`
 	UCN        string    `json:"ucn"`
+	Email      string    `json:"email"`
 }
 
 type ResponseCitizenPersonalDoctor struct {
@@ -35,7 +36,7 @@ type ResponseCitizenPersonalDoctor struct {
 }
 
 type QueryCitizenAvailablePharmacyGet struct {
-	PrescriptionId uuid.UUID `query:"prescription_id"`
+	PrescriptionId uuid.UUID `query:"prescriptionId"`
 }
 
 type ResponseCitizenAvailablePharmacy struct {
@@ -45,15 +46,17 @@ type ResponseCitizenAvailablePharmacy struct {
 }
 
 type ResponseCitizenPrescription struct {
-	ID     uuid.UUID `json:"id"`
-	State  string    `json:"status"`
-	Doctor struct {
-		FirstName string `json:"first_name"`
-		LastName  string `json:"last_name"`
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	State     string    `json:"status"`
+	StartDate time.Time `json:"issuedDate"`
+	Doctor    struct {
+		FirstName string `json:"firstName"`
+		LastName  string `json:"lastName"`
 		UIN       string `json:"uin"`
 	} `json:"doctor"`
 	Medicaments []struct {
-		Name string `json:"name"`
-		Unit uint   `json:"unit"`
+		Name     string `json:"name"`
+		Quantity uint   `json:"quantity"`
 	} `json:"medicaments"`
 }

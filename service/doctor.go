@@ -18,7 +18,8 @@ type DoctorService interface {
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
 	GetCitizenInfo(doctorId uuid.UUID, citizenUcn string, citizenDto *dto.ResponseDoctorCitizenInfo) error
-	GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, citizenPrescriptionDto *[]dto.ResponseDoctorGetCitizenPrescriptionResponse) error
+	GetCitizensViaCommonUCN(ucn string, citizensDto *[]dto.ResponseListOfCitizensViaCommonUCN) error
+	GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, citizenPrescriptionDto *[]dto.ResponseDoctorGetCitizenPrescription) error
 	CreatePrescription(doctorId, citizenId uuid.UUID, newPrescriptionDto *dto.RequestDoctorCreatePrescription) error
 }
 
@@ -74,17 +75,17 @@ func (d *doctorService) GetCitizenInfo(doctorId uuid.UUID, citizenUcn string, ci
 	return nil
 }
 
-func (d *doctorService) GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, citizenPrescriptionDto *[]dto.ResponseDoctorGetCitizenPrescriptionResponse) error {
+func (d *doctorService) GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, citizenPrescriptionDto *[]dto.ResponseDoctorGetCitizenPrescription) error {
 	var prescriptions []models.Prescription
 
 	if err := d.repo.FindPrescriptionsByCitizenId(citizenId, &prescriptions); err != nil {
 		return err
 	}
 
-	*citizenPrescriptionDto = make([]dto.ResponseDoctorGetCitizenPrescriptionResponse, len(prescriptions))
+	*citizenPrescriptionDto = make([]dto.ResponseDoctorGetCitizenPrescription, len(prescriptions))
 
 	for i, prescription := range prescriptions {
-		(*citizenPrescriptionDto)[i] = dto.ResponseDoctorGetCitizenPrescriptionResponse{
+		(*citizenPrescriptionDto)[i] = dto.ResponseDoctorGetCitizenPrescription{
 			Id:          prescription.ID,
 			Name:        prescription.Name,
 			State:       string(prescription.State),
@@ -94,7 +95,7 @@ func (d *doctorService) GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, 
 		}
 
 		(*citizenPrescriptionDto)[i].Medicaments = []struct {
-			OfficialName string `json:"official_name"`
+			OfficialName string `json:"officialName"`
 			Quantity     uint   `json:"quantity"`
 		}(make([]struct {
 			OfficialName string
@@ -104,6 +105,27 @@ func (d *doctorService) GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, 
 		for k, medicament := range prescription.Medicaments {
 			(*citizenPrescriptionDto)[i].Medicaments[k].OfficialName = medicament.Medicament.OfficialName
 			(*citizenPrescriptionDto)[i].Medicaments[k].Quantity = medicament.Quantity
+		}
+	}
+
+	return nil
+}
+
+func (d *doctorService) GetCitizensViaCommonUCN(ucn string, citizensDto *[]dto.ResponseListOfCitizensViaCommonUCN) error {
+	var citizens []models.Citizen
+
+	err := d.repo.FindCitizensByCommonUcn(ucn, &citizens)
+	if err != nil {
+		return err
+	}
+
+	*citizensDto = make([]dto.ResponseListOfCitizensViaCommonUCN, len(citizens))
+
+	for i, citizen := range citizens {
+		(*citizensDto)[i] = dto.ResponseListOfCitizensViaCommonUCN{
+			FirstName: citizen.FirstName,
+			LastName:  citizen.LastName,
+			UCN:       citizen.UCN,
 		}
 	}
 
