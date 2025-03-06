@@ -12,6 +12,7 @@ type DoctorRepo interface {
 	FindCitizensByCommonUcn(citizenUcn string, citizens *[]models.Citizen) error
 	FindPrescriptionsByCitizenId(citizenId uuid.UUID, prescriptions *[]models.Prescription) error
 
+	FindMedicamentByCommonName(commonName string, medicament *[]models.Medicament) error
 	FindMedicamentByName(name string, medicament *models.Medicament) error
 
 	CreatePrescription(prescription *models.Prescription) error
@@ -53,4 +54,8 @@ func (d *doctorRepo) FindMedicamentByName(name string, medicament *models.Medica
 
 func (d *doctorRepo) CreatePrescription(prescription *models.Prescription) error {
 	return d.repo.Create(prescription).Error
+}
+
+func (d *doctorRepo) FindMedicamentByCommonName(commonName string, medicament *[]models.Medicament) error {
+	return d.repo.Find(medicament, "official_name LIKE ?", commonName+"%").Limit(7).Error
 }

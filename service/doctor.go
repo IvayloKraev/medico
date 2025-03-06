@@ -20,7 +20,8 @@ type DoctorService interface {
 	GetCitizenInfo(doctorId uuid.UUID, citizenUcn string, citizenDto *dto.ResponseDoctorCitizenInfo) error
 	GetCitizensViaCommonUCN(ucn string, citizensDto *[]dto.ResponseListOfCitizensViaCommonUCN) error
 	GetCitizensPrescriptions(doctorId, citizenId uuid.UUID, citizenPrescriptionDto *[]dto.ResponseDoctorGetCitizenPrescription) error
-	CreatePrescription(doctorId, citizenId uuid.UUID, newPrescriptionDto *dto.RequestDoctorCreatePrescription) error
+	CreatePrescription(doctorId uuid.UUID, newPrescriptionDto *dto.RequestDoctorCreatePrescription) error
+	GetMedicamentByCommonName(commonName *dto.QueryDoctorGetMedicamentByCommonName, medicaments *[]dto.ResponseDoctorGetMedicamentPrescription) error
 }
 
 type doctorService struct {
@@ -132,24 +133,21 @@ func (d *doctorService) GetCitizensViaCommonUCN(ucn string, citizensDto *[]dto.R
 	return nil
 }
 
-func (d *doctorService) CreatePrescription(doctorId uuid.UUID, citizenId uuid.UUID, newPrescriptionDto *dto.RequestDoctorCreatePrescription) error {
+func (d *doctorService) CreatePrescription(doctorId uuid.UUID, newPrescriptionDto *dto.RequestDoctorCreatePrescription) error {
 	medicaments := make([]models.PrescriptionMedicament, len(newPrescriptionDto.Medicaments))
 
 	for i, medicament := range newPrescriptionDto.Medicaments {
-		med := &models.Medicament{}
-
-		if err := d.repo.FindMedicamentByName(medicament.OfficialName, med); err != nil {
-			return err
+		medicaments[i] = models.PrescriptionMedicament{
+			MedicamentID: medicament.Id,
+			Quantity:     medicament.Quantity,
+			Fulfilled:    false,
 		}
-		medicaments[i].MedicamentID = med.ID
-		medicaments[i].Quantity = medicament.Quantity
-		medicaments[i].Fulfilled = false
 	}
 
 	newPrescription := models.Prescription{
 		ID:           uuid.New(),
 		DoctorID:     doctorId,
-		CitizenID:    citizenId,
+		CitizenID:    newPrescriptionDto.CitizenId,
 		Medicaments:  medicaments,
 		State:        "active",
 		Name:         newPrescriptionDto.Name,
@@ -159,4 +157,23 @@ func (d *doctorService) CreatePrescription(doctorId uuid.UUID, citizenId uuid.UU
 	}
 
 	return d.repo.CreatePrescription(&newPrescription)
+}
+
+func (d *doctorService) GetMedicamentByCommonName(commonName *dto.QueryDoctorGetMedicamentByCommonName, medicamentsDto *[]dto.ResponseDoctorGetMedicamentPrescription) error {
+	medicaments := new([]models.Medicament)
+	err := d.repo.FindMedicamentByCommonName(commonName.CommonName, medicaments)
+	if err != nil {
+		return err
+	}
+
+	*medicamentsDto = make([]dto.ResponseDoctorGetMedicamentPrescription, len(*medicaments))
+
+	for i, medicament := range *medicaments {
+		(*medicamentsDto)[i] = dto.ResponseDoctorGetMedicamentPrescription{
+			Id:   medicament.ID,
+			Name: medicament.OfficialName,
+		}
+	}
+
+	return nil
 }

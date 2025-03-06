@@ -16,6 +16,7 @@ type DoctorController interface {
 	VerifySession(ctx *fiber.Ctx) error
 
 	GetCitizenInfo(ctx *fiber.Ctx) error
+	GetMedicamentByCommonName(ctx *fiber.Ctx) error
 	GetListOfCitizensViaCommonUCN(ctx *fiber.Ctx) error
 	GetCitizenPrescriptions(ctx *fiber.Ctx) error
 	CreateCitizenPrescription(ctx *fiber.Ctx) error
@@ -160,9 +161,26 @@ func (d *doctorController) CreateCitizenPrescription(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	if err := d.service.CreatePrescription(ctx.Locals("doctorId").(uuid.UUID), citizenPrescriptionDto.CitizenId, citizenPrescriptionDto); err != nil {
+	if err := d.service.CreatePrescription(ctx.Locals("doctorId").(uuid.UUID), citizenPrescriptionDto); err != nil {
 		return err
 	}
 
 	return ctx.Status(200).JSON(nil)
+}
+
+func (d *doctorController) GetMedicamentByCommonName(ctx *fiber.Ctx) error {
+	commonName := new(dto.QueryDoctorGetMedicamentByCommonName)
+
+	if err := ctx.QueryParser(commonName); err != nil {
+		return err
+	}
+
+	medicamentsDto := new([]dto.ResponseDoctorGetMedicamentPrescription)
+
+	err := d.service.GetMedicamentByCommonName(commonName, medicamentsDto)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(200).JSON(medicamentsDto)
 }

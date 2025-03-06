@@ -22,6 +22,15 @@ type ResponsePharmacyOwnerBranches struct {
 	Name string    `json:"name"`
 }
 
+type QueryGetBranchesByCommonName struct {
+	Name string `query:"name"`
+}
+
+type ResponseGetBranchesByCommonName struct {
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
+}
+
 type RequestPharmacyOwnerNewBranch struct {
 	Name      string  `json:"name"`
 	Latitude  float32 `json:"latitude"`
@@ -41,9 +50,9 @@ type ResponsePharmacyOwnerPharmacist struct {
 }
 
 type RequestPharmacyOwnerNewPharmacist struct {
-	FirstName     string    `json:"first_name"`
-	LastName      string    `json:"last_name"`
-	WorkingBranch uuid.UUID `json:"working_branch"`
+	FirstName     string    `json:"firstName"`
+	LastName      string    `json:"lastName"`
+	WorkingBranch uuid.UUID `json:"pharmacy"`
 	Email         string    `json:"email"`
 	Password      string    `json:"password"`
 }
@@ -73,27 +82,34 @@ func (p *RequestPharmacistAuth) Validate() error {
 }
 
 type QueryPharmacistCitizenPrescriptionGet struct {
-	CitizenUCN string `query:"citizen_ucn"`
+	CitizenUCN string `query:"citizenUcn"`
 }
 
 type RequestPharmacistCitizenFulfillWholePrescription struct {
-	CitizenId      uuid.UUID `json:"citizen_id"`
-	BranchId       uuid.UUID `json:"branch_id"`
-	PrescriptionId uuid.UUID `json:"prescription_id"`
+	Prescriptions []struct {
+		Id uuid.UUID `json:"id"`
+	} `json:"prescriptions"`
 }
 
+//type RequestPharmacistCitizenFulfillMedicamentFromPrescription struct {
+//	CitizenId      uuid.UUID `json:"citizen_id"`
+//	PrescriptionId uuid.UUID `json:"prescription_id"`
+//	MedicamentId   uuid.UUID `json:"medicament_id"`
+//}
+
 type RequestPharmacistCitizenFulfillMedicamentFromPrescription struct {
-	CitizenId      uuid.UUID `json:"citizen_id"`
-	PrescriptionId uuid.UUID `json:"prescription_id"`
-	MedicamentId   uuid.UUID `json:"medicament_id"`
+	Prescriptions []struct {
+		Id          uuid.UUID `json:"id"`
+		Medicaments []struct {
+			Id uuid.UUID `json:"id"`
+		} `json:"medicaments"`
+	} `json:"prescriptions"`
 }
 
 type RequestPharmacistBranchAddMedicament struct {
-	BranchId    uuid.UUID `json:"branch_id"`
 	Medicaments []struct {
-		MedicamentId   uuid.UUID `json:"medicament_id"`
-		MedicamentName string    `json:"medicament_name"`
-		Quantity       uint      `json:"quantity"`
+		MedicamentId uuid.UUID `json:"id"`
+		Quantity     uint      `json:"quantity"`
 	} `json:"medicaments"`
 }
 
@@ -101,11 +117,12 @@ type ResponsePharmacistCitizenPrescription struct {
 	ID           uuid.UUID `json:"id"`
 	Name         string    `json:"name"`
 	CreationDate time.Time `json:"creation_date"`
-	StartDate    time.Time `json:"start_date"`
+	StartDate    time.Time `json:"issuedDate"`
 	EndDate      time.Time `json:"end_date"`
 	Medicaments  []struct {
-		MedicamentName string `json:"medicament_name"`
-		Quantity       uint   `json:"quantity"`
-		Fulfilled      bool   `json:"fulfilled"`
+		Id           uuid.UUID `json:"id"`
+		OfficialName string    `json:"officialName"`
+		Quantity     uint      `json:"quantity"`
+		Fulfilled    bool      `json:"fulfilled"`
 	} `json:"medicaments"`
 }

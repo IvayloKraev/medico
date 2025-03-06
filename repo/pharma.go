@@ -15,6 +15,7 @@ type PharmacyOwnerRepo interface {
 	FindPharmacyBrandByOwnerId(pharmacyOwnerId uuid.UUID, pharmacyBrand *models.PharmacyBrand) error
 	FindPharmacyBranchesByBrandId(pharmacyBrandId uuid.UUID, pharmacyBranches *[]models.PharmacyBranch) error
 	FindPharmacyBranchesByOwnerId(pharmacyOwnerId uuid.UUID, pharmacyBranches *[]models.PharmacyBranch) error
+	FindPharmacyBranchesByOwnerIdAndCommonName(pharmacyOwnerId uuid.UUID, commonName string, pharmacyBranches *[]models.PharmacyBranch) error
 	FindPharmacistsByBranchID(pharmacyBranchId uuid.UUID, pharmacists *[]models.Pharmacist) error
 	FindPharmacistsByPharmacyOwnerId(pharmacyOwnerId uuid.UUID, pharmacists *[]models.Pharmacist) error
 
@@ -33,34 +34,42 @@ func NewPharmacyOwnerRepo() PharmacyOwnerRepo {
 	}
 }
 
-func (p pharmacyOwnerRepo) FindAuthByEmail(email string, pharmacyOwner *models.PharmacyOwnerAuth) error {
+func (p *pharmacyOwnerRepo) FindAuthByEmail(email string, pharmacyOwner *models.PharmacyOwnerAuth) error {
 	return p.repo.First(pharmacyOwner, "email = ?", email).Error
 }
 
-func (p pharmacyOwnerRepo) FindDataById(pharmacyOwnerId uuid.UUID, pharmacyOwner *models.PharmacyOwner) error {
+func (p *pharmacyOwnerRepo) FindDataById(pharmacyOwnerId uuid.UUID, pharmacyOwner *models.PharmacyOwner) error {
 	return p.repo.First(pharmacyOwner, "id = ?", pharmacyOwnerId).Error
 }
 
-func (p pharmacyOwnerRepo) FindPharmacyBrandByOwnerId(pharmacyOwnerId uuid.UUID, pharmacyBrand *models.PharmacyBrand) error {
+func (p *pharmacyOwnerRepo) FindPharmacyBrandByOwnerId(pharmacyOwnerId uuid.UUID, pharmacyBrand *models.PharmacyBrand) error {
 	return p.repo.First(pharmacyBrand, "owner_id = ?", pharmacyOwnerId).Error
 }
 
-func (p pharmacyOwnerRepo) FindPharmacyBranchesByBrandId(pharmacyBrandId uuid.UUID, pharmacyBranches *[]models.PharmacyBranch) error {
+func (p *pharmacyOwnerRepo) FindPharmacyBranchesByBrandId(pharmacyBrandId uuid.UUID, pharmacyBranches *[]models.PharmacyBranch) error {
 	return p.repo.Find(pharmacyBranches, "pharmacy_brand_id = ?", pharmacyBrandId).Error
 }
 
-func (p pharmacyOwnerRepo) FindPharmacyBranchesByOwnerId(pharmacyOwnerId uuid.UUID, pharmacyBranches *[]models.PharmacyBranch) error {
+func (p *pharmacyOwnerRepo) FindPharmacyBranchesByOwnerIdAndCommonName(pharmacyOwnerId uuid.UUID, commonName string, pharmacyBranches *[]models.PharmacyBranch) error {
+	return p.repo.Model(models.PharmacyBranch{}).
+		InnerJoins("INNER JOIN pharmacy_brands ON pharmacy_branches.pharmacy_brand_id = pharmacy_brands.id").
+		Where("pharmacy_brands.owner_id = ?", pharmacyOwnerId).
+		Where("pharmacy_branches.name LIKE ?", commonName+"%").
+		Find(pharmacyBranches).Error
+}
+
+func (p *pharmacyOwnerRepo) FindPharmacyBranchesByOwnerId(pharmacyOwnerId uuid.UUID, pharmacyBranches *[]models.PharmacyBranch) error {
 	return p.repo.Model(models.PharmacyBranch{}).
 		InnerJoins("INNER JOIN pharmacy_brands ON pharmacy_branches.pharmacy_brand_id = pharmacy_brands.id").
 		Where("pharmacy_brands.owner_id = ?", pharmacyOwnerId).
 		Find(pharmacyBranches).Error
 }
 
-func (p pharmacyOwnerRepo) FindPharmacistsByBranchID(pharmacyBranchId uuid.UUID, pharmacists *[]models.Pharmacist) error {
+func (p *pharmacyOwnerRepo) FindPharmacistsByBranchID(pharmacyBranchId uuid.UUID, pharmacists *[]models.Pharmacist) error {
 	return p.repo.Find(pharmacists, "pharmacy_branch_id = ?", pharmacyBranchId).Error
 }
 
-func (p pharmacyOwnerRepo) FindPharmacistsByPharmacyOwnerId(pharmacyOwnerId uuid.UUID, pharmacists *[]models.Pharmacist) error {
+func (p *pharmacyOwnerRepo) FindPharmacistsByPharmacyOwnerId(pharmacyOwnerId uuid.UUID, pharmacists *[]models.Pharmacist) error {
 	return p.repo.Model(models.Pharmacist{}).
 		InnerJoins("INNER JOIN pharmacy_branches ON pharmacists.pharmacy_branch_id = pharmacy_branches.id").
 		InnerJoins("INNER JOIN pharmacy_brands ON pharmacy_branches.pharmacy_brand_id = pharmacy_brands.id").
@@ -68,11 +77,11 @@ func (p pharmacyOwnerRepo) FindPharmacistsByPharmacyOwnerId(pharmacyOwnerId uuid
 		Find(pharmacists).Error
 }
 
-func (p pharmacyOwnerRepo) CreatePharmacyBranch(pharmacyBranch *models.PharmacyBranch) error {
+func (p *pharmacyOwnerRepo) CreatePharmacyBranch(pharmacyBranch *models.PharmacyBranch) error {
 	return p.repo.Create(pharmacyBranch).Error
 }
 
-func (p pharmacyOwnerRepo) CreatePharmacist(pharmacist *models.PharmacistAuth) error {
+func (p *pharmacyOwnerRepo) CreatePharmacist(pharmacist *models.PharmacistAuth) error {
 	return p.repo.Create(pharmacist).Error
 }
 
@@ -81,9 +90,11 @@ type PharmacistRepo interface {
 
 	FindActivePrescriptionsByCitizenUcn(citizenUcn string, activePrescriptions *[]models.Prescription) error
 	FulfillWholePrescription(branchId, prescriptionId uuid.UUID) error
-	FulfillMedicamentFromPrescription(prescriptionId uuid.UUID, medicamentId uuid.UUID) error
+	FulfillMedicamentFromPrescription(medicamentId uuid.UUID) error
 
 	AddMedicamentToBranchStorage(branchId uuid.UUID, medicamentId uuid.UUID, quantity uint) error
+	AddMedicamentToBranchStorageViaPharmacistId(pharmacistId uuid.UUID, medicamentId uuid.UUID, quantity uint) error
+	FindMedicamentByCommonName(commonName string, medicament *[]models.Medicament) error
 }
 
 type pharmacistRepo struct {
@@ -111,7 +122,10 @@ func (p pharmacistRepo) FindActivePrescriptionsByCitizenUcn(citizenUcn string, a
 		Find(activePrescriptions).Error
 }
 
-func (p pharmacistRepo) FulfillWholePrescription(branchId, prescriptionId uuid.UUID) error {
+func (p pharmacistRepo) FulfillWholePrescription(pharmacistId, prescriptionId uuid.UUID) error {
+	pharmacist := models.Pharmacist{}
+	p.repo.Model(&models.Pharmacist{}).Where("id = ?", pharmacistId).First(&pharmacist)
+
 	return p.repo.Transaction(func(tx Repository) error {
 		return errors.Join(
 			tx.Model(models.Prescription{}).
@@ -123,7 +137,7 @@ func (p pharmacistRepo) FulfillWholePrescription(branchId, prescriptionId uuid.U
 				Update("fulfilled", true).Error,
 
 			tx.Model(models.PharmacyBranchStorage{}).
-				Where("pharmacy_branch_storages.pharmacy_branch_id = ?", branchId).
+				Where("pharmacy_branch_storages.pharmacy_branch_id = ?", pharmacist.PharmacyBranchID).
 				Update("pharmacy_branch_storages.quantity",
 					gorm.Expr("pharmacy_branch_storages.quantity - (?)",
 						tx.Model(models.PrescriptionMedicament{}).
@@ -133,9 +147,9 @@ func (p pharmacistRepo) FulfillWholePrescription(branchId, prescriptionId uuid.U
 	})
 }
 
-func (p pharmacistRepo) FulfillMedicamentFromPrescription(prescriptionId uuid.UUID, medicamentId uuid.UUID) error {
+func (p pharmacistRepo) FulfillMedicamentFromPrescription(medicamentId uuid.UUID) error {
 	return p.repo.Model(models.PrescriptionMedicament{}).
-		Where("prescription_id = ? AND medicament_id = ?", prescriptionId, medicamentId).
+		Where("medicament_id = ?", medicamentId).
 		Update("fulfilled", true).Error
 }
 
@@ -157,4 +171,31 @@ func (p pharmacistRepo) AddMedicamentToBranchStorage(branchId uuid.UUID, medicam
 	}
 
 	return nil
+}
+
+func (p pharmacistRepo) AddMedicamentToBranchStorageViaPharmacistId(pharmacistId uuid.UUID, medicamentId uuid.UUID, quantity uint) error {
+	pharmacist := models.Pharmacist{}
+	p.repo.Model(&models.Pharmacist{}).Where("id = ?", pharmacistId).First(&pharmacist)
+
+	pharmacyBranchStorage := models.PharmacyBranchStorage{
+		PharmacyBranchID: pharmacist.PharmacyBranchID,
+		MedicamentID:     medicamentId,
+		Quantity:         quantity,
+	}
+
+	if err := p.repo.First(&pharmacyBranchStorage, "pharmacy_branch_id = ? AND medicament_id = ?", pharmacist.PharmacyBranchID, medicamentId).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			p.repo.Create(&pharmacyBranchStorage)
+		} else {
+			return err
+		}
+	} else {
+		p.repo.Model(&pharmacyBranchStorage).Where("pharmacy_branch_id = ? AND medicament_id = ?", pharmacist.PharmacyBranchID, medicamentId).Update("quantity", gorm.Expr("quantity + ?", quantity))
+	}
+
+	return nil
+}
+
+func (p pharmacistRepo) FindMedicamentByCommonName(commonName string, medicament *[]models.Medicament) error {
+	return p.repo.Find(medicament, "official_name LIKE ?", commonName+"%").Limit(7).Error
 }

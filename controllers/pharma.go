@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"medico/dto"
@@ -16,6 +17,7 @@ type PharmacyOwnerController interface {
 	VerifySession(ctx *fiber.Ctx) error
 
 	GetAllBranches(ctx *fiber.Ctx) error
+	GetBranchesByCommonName(ctx *fiber.Ctx) error
 	GetAllPharmacists(ctx *fiber.Ctx) error
 	NewPharmacyBranch(ctx *fiber.Ctx) error
 	NewPharmacist(ctx *fiber.Ctx) error
@@ -114,6 +116,23 @@ func (c *pharmacyOwnerController) GetAllBranches(ctx *fiber.Ctx) error {
 	return ctx.Status(fiber.StatusOK).JSON(*branches)
 }
 
+func (c *pharmacyOwnerController) GetBranchesByCommonName(ctx *fiber.Ctx) error {
+	branchCommonName := new(dto.QueryGetBranchesByCommonName)
+
+	if err := ctx.QueryParser(branchCommonName); err != nil {
+		return err
+	}
+
+	branches := new([]dto.ResponseGetBranchesByCommonName)
+
+	err := c.service.GetBranchesByCommonName(ctx.Locals("pharmacyOwnerId").(uuid.UUID), branchCommonName.Name, branches)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(*branches)
+}
+
 func (c *pharmacyOwnerController) GetAllPharmacists(ctx *fiber.Ctx) error {
 	pharmacists := new([]dto.ResponsePharmacyOwnerPharmacist)
 
@@ -145,6 +164,8 @@ func (c *pharmacyOwnerController) NewPharmacist(ctx *fiber.Ctx) error {
 		return err
 	}
 
+	fmt.Println(newPharmacist)
+
 	if err := c.service.NewPharmacist(ctx.Locals("pharmacyOwnerId").(uuid.UUID), newPharmacist); err != nil {
 		return err
 	}
@@ -162,6 +183,7 @@ type PharmacistController interface {
 	FulfillMedicamentFromPrescription(ctx *fiber.Ctx) error
 
 	AddMedicamentToBranchStorage(ctx *fiber.Ctx) error
+	GetMedicamentsByCommonName(ctx *fiber.Ctx) error
 }
 
 type pharmacistController struct {
@@ -269,7 +291,7 @@ func (c *pharmacistController) FulfillPrescription(ctx *fiber.Ctx) error {
 		return err
 	}
 
-	if err := c.service.FulfillWholePrescription(input); err != nil {
+	if err := c.service.FulfillWholePrescription(ctx.Locals("pharmacistId").(uuid.UUID), input); err != nil {
 		return err
 	}
 
@@ -295,8 +317,25 @@ func (c *pharmacistController) AddMedicamentToBranchStorage(ctx *fiber.Ctx) erro
 	if err := ctx.BodyParser(input); err != nil {
 		return err
 	}
-	if err := c.service.AddMedicamentToBranchStorage(input); err != nil {
+	if err := c.service.AddMedicamentToBranchStorage(ctx.Locals("pharmacistId").(uuid.UUID), input); err != nil {
 		return err
 	}
 	return ctx.Status(fiber.StatusOK).JSON(nil)
+}
+
+func (c *pharmacistController) GetMedicamentsByCommonName(ctx *fiber.Ctx) error {
+	commonName := new(dto.QueryDoctorGetMedicamentByCommonName)
+
+	if err := ctx.QueryParser(commonName); err != nil {
+		return err
+	}
+
+	medicamentsDto := new([]dto.ResponseDoctorGetMedicamentPrescription)
+
+	err := c.service.GetMedicamentByCommonName(commonName, medicamentsDto)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(200).JSON(medicamentsDto)
 }

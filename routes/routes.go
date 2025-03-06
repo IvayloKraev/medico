@@ -167,6 +167,7 @@ func setupDoctorRoutes(route fiber.Router) {
 	doctorRoute.Get("/citizens/ucn", doctor.GetListOfCitizensViaCommonUCN)
 	doctorRoute.Get("/citizen/prescription", doctor.GetCitizenPrescriptions)
 	doctorRoute.Post("/citizen/prescription", doctor.CreateCitizenPrescription)
+	doctorRoute.Get("/medicaments/commonName", doctor.GetMedicamentByCommonName)
 }
 
 func setupCitizenRoute(router fiber.Router) {
@@ -191,6 +192,7 @@ func setupPharmacyOwnerRoute(router fiber.Router) {
 	pharmacyRoute.Post("/logout", pharmacy.Logout)
 	pharmacyRoute.Get("/branches", pharmacy.GetAllBranches)
 	pharmacyRoute.Get("/pharmacists", pharmacy.GetAllPharmacists)
+	pharmacyRoute.Get("/branches/commonName", pharmacy.GetBranchesByCommonName)
 	pharmacyRoute.Post("/branch/new", pharmacy.NewPharmacyBranch)
 	pharmacyRoute.Post("/pharmacist/new", pharmacy.NewPharmacist)
 }
@@ -202,6 +204,7 @@ func setupPharmacistsRoute(router fiber.Router) {
 	pharmacistRoute.Use(pharmacist.VerifySession)
 	pharmacistRoute.Post("/login", pharmacist.Login)
 	pharmacistRoute.Post("/logout", pharmacist.Logout)
+	pharmacistRoute.Get("/medicaments/commonName", pharmacist.GetMedicamentsByCommonName)
 	pharmacistRoute.Get("/prescription/get", pharmacist.GetCitizenPrescription)
 	pharmacistRoute.Post("/prescription/fulfill", pharmacist.FulfillPrescription)
 	pharmacistRoute.Post("/prescription/fulfillMedicament", pharmacist.FulfillMedicamentFromPrescription)

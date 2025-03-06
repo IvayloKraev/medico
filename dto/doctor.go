@@ -22,8 +22,8 @@ type RequestDoctorCreatePrescription struct {
 	Name        string    `json:"name"`
 	EndDate     time.Time `json:"end_date"`
 	Medicaments []struct {
-		OfficialName string `json:"officialName"`
-		Quantity     uint   `json:"quantity"`
+		Id       uuid.UUID `json:"id"`
+		Quantity uint      `json:"quantity"`
 	} `json:"medicaments"`
 }
 
@@ -65,6 +65,15 @@ type ResponseDoctorGetCitizenPrescription struct {
 	} `json:"medicaments"`
 	State       string    `json:"status"`
 	CreatedDate time.Time `json:"createdDate"`
-	StartDate   time.Time `json:"startDate"`
+	StartDate   time.Time `json:"issuedDate"`
 	EndDate     time.Time `json:"endDate"`
+}
+
+type QueryDoctorGetMedicamentByCommonName struct {
+	CommonName string `json:"name"`
+}
+
+type ResponseDoctorGetMedicamentPrescription struct {
+	Id   uuid.UUID `json:"id"`
+	Name string    `json:"officialName"`
 }
