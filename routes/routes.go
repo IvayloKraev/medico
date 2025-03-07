@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/csrf"
 	"github.com/gofiber/storage/redis/v3"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 	"medico/config"
 	"medico/controllers"
 	"medico/models"
@@ -121,10 +122,15 @@ func setupAdminRoutes(router fiber.Router) {
 
 		db := repo.CreateNewRepository(databaseConfig)
 
+		password, err := bcrypt.GenerateFromPassword([]byte(m.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+
 		t := models.AdminAuth{
 			ID:       uuid.New(),
 			Email:    m.Email,
-			Password: m.Password,
+			Password: string(password),
 		}
 
 		db.Create(t)
