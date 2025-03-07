@@ -5,8 +5,11 @@ import (
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/csrf"
 	"github.com/gofiber/storage/redis/v3"
+	"github.com/google/uuid"
 	"medico/config"
 	"medico/controllers"
+	"medico/models"
+	"medico/repo"
 	"strings"
 )
 
@@ -102,6 +105,32 @@ func setupAdminRoutes(router fiber.Router) {
 	adminRoute.Get("/moderator/get", admin.GetModerators)
 	adminRoute.Post("/moderator/create", admin.AddModerator)
 	adminRoute.Delete("/moderator/delete", admin.DeleteModerator)
+	adminRoute.Post("/register", func(ctx *fiber.Ctx) error {
+		type RegisterForm struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}
+
+		m := new(RegisterForm)
+
+		err := ctx.BodyParser(m)
+		if err != nil {
+			return err
+		}
+		databaseConfig := config.LoadDatabaseConfig()
+
+		db := repo.CreateNewRepository(databaseConfig)
+
+		t := models.AdminAuth{
+			ID:       uuid.New(),
+			Email:    m.Email,
+			Password: m.Password,
+		}
+
+		db.Create(t)
+
+		return nil
+	})
 }
 
 func setUpModeratorRoutes(moderatorRoute fiber.Router) {
