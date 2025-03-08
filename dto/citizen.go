@@ -56,7 +56,7 @@ type ResponseCitizenPrescription struct {
 		UIN       string `json:"uin"`
 	} `json:"doctor"`
 	Medicaments []struct {
-		Name     string `json:"name"`
+		Name     string `json:"officialName"`
 		Quantity uint   `json:"quantity"`
 	} `json:"medicaments"`
 }
