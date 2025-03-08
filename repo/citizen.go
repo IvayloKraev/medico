@@ -43,6 +43,6 @@ func (c *citizenRepo) FindAvailablePharmacies(prescriptionId uuid.UUID, branches
 	return c.repo.Model(models.PharmacyBranch{}).
 		Joins("LEFT JOIN pharmacy_branch_storages ON pharmacy_branches.id = pharmacy_branch_storages.pharmacy_branch_id").
 		Joins("LEFT JOIN prescription_medicaments ON pharmacy_branch_storages.medicament_id = prescription_medicaments.medicament_id AND prescription_medicaments.prescription_id = ?", prescriptionId).
-		Where("pharmacy_branch_storages.quantity > prescription_medicaments.quantity").
+		Where("pharmacy_branch_storages.quantity >= prescription_medicaments.quantity").
 		Find(branches).Error
 }
