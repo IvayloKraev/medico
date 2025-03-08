@@ -141,14 +141,14 @@ func (c *citizenService) ListPrescriptions(citizenId uuid.UUID, prescriptionsDto
 				UIN:       prescription.Doctor.UIN,
 			},
 			Medicaments: make([]struct {
-				Name     string `json:"name"`
+				Name     string `json:"officialName"`
 				Quantity uint   `json:"quantity"`
 			}, len(prescription.Medicaments)),
 		}
 
 		for i2, medicament := range prescription.Medicaments {
 			(*prescriptionsDto)[i].Medicaments[i2] = struct {
-				Name     string `json:"name"`
+				Name     string `json:"officialName"`
 				Quantity uint   `json:"quantity"`
 			}{
 				Name:     medicament.Medicament.OfficialName,
