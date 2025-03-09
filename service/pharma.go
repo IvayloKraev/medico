@@ -16,11 +16,12 @@ type PharmacyOwnerService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	GetAllBranches(pharmacyOwnerId uuid.UUID, branches *[]dto.PharmacyOwnerBranches) error
-	GetAllPharmacists(pharmacyOwnerId uuid.UUID, pharmacists *[]dto.PharmacyOwnerPharmacist) error
+	GetAllBranches(pharmacyOwnerId uuid.UUID, branches *[]dto.ResponsePharmacyOwnerBranches) error
+	GetBranchesByCommonName(ownerId uuid.UUID, name string, branchesDto *[]dto.ResponseGetBranchesByCommonName) error
+	GetAllPharmacists(pharmacyOwnerId uuid.UUID, pharmacists *[]dto.ResponsePharmacyOwnerPharmacist) error
 
-	NewPharmacyBranch(pharmacyOwnerId uuid.UUID, branch *dto.PharmacyOwnerNewBranch) error
-	NewPharmacist(pharmacyOwnerId uuid.UUID, pharmacist *dto.PharmacyOwnerNewPharmacist) error
+	NewPharmacyBranch(pharmacyOwnerId uuid.UUID, branch *dto.RequestPharmacyOwnerNewBranch) error
+	NewPharmacist(pharmacyOwnerId uuid.UUID, pharmacist *dto.RequestPharmacyOwnerNewPharmacist) error
 }
 
 type pharmacyOwnerService struct {
@@ -35,7 +36,7 @@ func NewPharmacyOwnerService() PharmacyOwnerService {
 	}
 }
 
-func (p pharmacyOwnerService) AuthenticateByEmailAndPassword(email string, password string, pharmacyOwnerAuth *models.PharmacyOwnerAuth) error {
+func (p *pharmacyOwnerService) AuthenticateByEmailAndPassword(email string, password string, pharmacyOwnerAuth *models.PharmacyOwnerAuth) error {
 	if err := p.repo.FindAuthByEmail(email, pharmacyOwnerAuth); err != nil {
 		return err
 	}
@@ -47,29 +48,29 @@ func (p pharmacyOwnerService) AuthenticateByEmailAndPassword(email string, passw
 	return nil
 }
 
-func (p pharmacyOwnerService) CreateAuthenticationSession(pharmacyOwnerId uuid.UUID) (uuid.UUID, time.Duration, error) {
+func (p *pharmacyOwnerService) CreateAuthenticationSession(pharmacyOwnerId uuid.UUID) (uuid.UUID, time.Duration, error) {
 	return p.authSession.CreateAuthSession(pharmacyOwnerId)
 }
 
-func (p pharmacyOwnerService) GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error) {
+func (p *pharmacyOwnerService) GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error) {
 	return p.authSession.GetAuthSession(sessionID)
 }
 
-func (p pharmacyOwnerService) DeleteAuthenticationSession(sessionID uuid.UUID) error {
+func (p *pharmacyOwnerService) DeleteAuthenticationSession(sessionID uuid.UUID) error {
 	return p.authSession.DeleteAuthSession(sessionID)
 }
 
-func (p pharmacyOwnerService) GetAllBranches(pharmacyOwnerId uuid.UUID, branches *[]dto.PharmacyOwnerBranches) error {
+func (p *pharmacyOwnerService) GetAllBranches(pharmacyOwnerId uuid.UUID, branches *[]dto.ResponsePharmacyOwnerBranches) error {
 	pharmacyBranches := new([]models.PharmacyBranch)
 
 	if err := p.repo.FindPharmacyBranchesByOwnerId(pharmacyOwnerId, pharmacyBranches); err != nil {
 		return err
 	}
 
-	*branches = make([]dto.PharmacyOwnerBranches, len(*pharmacyBranches))
+	*branches = make([]dto.ResponsePharmacyOwnerBranches, len(*pharmacyBranches))
 
 	for i, pharmacyBranch := range *pharmacyBranches {
-		(*branches)[i] = dto.PharmacyOwnerBranches{
+		(*branches)[i] = dto.ResponsePharmacyOwnerBranches{
 			ID:   pharmacyBranch.ID,
 			Name: pharmacyBranch.Name,
 		}
@@ -78,17 +79,37 @@ func (p pharmacyOwnerService) GetAllBranches(pharmacyOwnerId uuid.UUID, branches
 	return nil
 }
 
-func (p pharmacyOwnerService) GetAllPharmacists(pharmacyOwnerId uuid.UUID, pharmacistsDto *[]dto.PharmacyOwnerPharmacist) error {
+func (p *pharmacyOwnerService) GetBranchesByCommonName(ownerId uuid.UUID, name string, branchesDto *[]dto.ResponseGetBranchesByCommonName) error {
+	branches := new([]models.PharmacyBranch)
+
+	err := p.repo.FindPharmacyBranchesByOwnerIdAndCommonName(ownerId, name, branches)
+	if err != nil {
+		return err
+	}
+
+	*branchesDto = make([]dto.ResponseGetBranchesByCommonName, len(*branches))
+
+	for i, pharmacyBranch := range *branches {
+		(*branchesDto)[i] = dto.ResponseGetBranchesByCommonName{
+			ID:   pharmacyBranch.ID,
+			Name: pharmacyBranch.Name,
+		}
+	}
+
+	return nil
+}
+
+func (p *pharmacyOwnerService) GetAllPharmacists(pharmacyOwnerId uuid.UUID, pharmacistsDto *[]dto.ResponsePharmacyOwnerPharmacist) error {
 	pharmacists := new([]models.Pharmacist)
 
 	if err := p.repo.FindPharmacistsByPharmacyOwnerId(pharmacyOwnerId, pharmacists); err != nil {
 		return err
 	}
 
-	*pharmacistsDto = make([]dto.PharmacyOwnerPharmacist, len(*pharmacists))
+	*pharmacistsDto = make([]dto.ResponsePharmacyOwnerPharmacist, len(*pharmacists))
 
 	for i, pharmacist := range *pharmacists {
-		(*pharmacistsDto)[i] = dto.PharmacyOwnerPharmacist{
+		(*pharmacistsDto)[i] = dto.ResponsePharmacyOwnerPharmacist{
 			ID:        pharmacist.ID,
 			FirstName: pharmacist.FirstName,
 			LastName:  pharmacist.Surname,
@@ -98,7 +119,7 @@ func (p pharmacyOwnerService) GetAllPharmacists(pharmacyOwnerId uuid.UUID, pharm
 	return nil
 }
 
-func (p pharmacyOwnerService) NewPharmacyBranch(pharmacyOwnerId uuid.UUID, branch *dto.PharmacyOwnerNewBranch) error {
+func (p *pharmacyOwnerService) NewPharmacyBranch(pharmacyOwnerId uuid.UUID, branch *dto.RequestPharmacyOwnerNewBranch) error {
 	pharmacyBrand := models.PharmacyBrand{}
 
 	if err := p.repo.FindPharmacyBrandByOwnerId(pharmacyOwnerId, &pharmacyBrand); err != nil {
@@ -120,7 +141,7 @@ func (p pharmacyOwnerService) NewPharmacyBranch(pharmacyOwnerId uuid.UUID, branc
 	return nil
 }
 
-func (p pharmacyOwnerService) NewPharmacist(pharmacyOwnerId uuid.UUID, pharmacist *dto.PharmacyOwnerNewPharmacist) error {
+func (p *pharmacyOwnerService) NewPharmacist(pharmacyOwnerId uuid.UUID, pharmacist *dto.RequestPharmacyOwnerNewPharmacist) error {
 	password, err := bcrypt.GenerateFromPassword([]byte(pharmacist.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
@@ -150,11 +171,12 @@ type PharmacistService interface {
 	GetAuthenticationSession(sessionID uuid.UUID) (uuid.UUID, error)
 	DeleteAuthenticationSession(sessionID uuid.UUID) error
 
-	GetCitizensActivePrescriptions(citizenUcn *dto.PharmacistCitizenPrescriptionGet, prescriptions *[]dto.PharmacistCitizenPrescription) error
-	FulfillWholePrescription(data *dto.PharmacistCitizenFulfillWholePrescription) error
-	FulfillMedicamentFromPrescription(data *dto.PharmacistCitizenFulfillMedicamentFromPrescription) error
+	GetCitizensActivePrescriptions(citizenUcn *dto.QueryPharmacistCitizenPrescriptionGet, prescriptions *[]dto.ResponsePharmacistCitizenPrescription) error
+	FulfillWholePrescription(pharmacistId uuid.UUID, data *dto.RequestPharmacistCitizenFulfillWholePrescription) error
+	FulfillMedicamentFromPrescription(data *dto.RequestPharmacistCitizenFulfillMedicamentFromPrescription) error
 
-	AddMedicamentToBranchStorage(data *dto.PharmacistBranchAddMedicament) error
+	AddMedicamentToBranchStorage(pharmacistId uuid.UUID, data *dto.RequestPharmacistBranchAddMedicament) error
+	GetMedicamentByCommonName(commonName *dto.QueryDoctorGetMedicamentByCommonName, medicamentsDto *[]dto.ResponseDoctorGetMedicamentPrescription) error
 }
 
 type pharmacistService struct {
@@ -193,53 +215,96 @@ func (p pharmacistService) DeleteAuthenticationSession(sessionID uuid.UUID) erro
 	return p.authSession.DeleteAuthSession(sessionID)
 }
 
-func (p pharmacistService) GetCitizensActivePrescriptions(citizenUcn *dto.PharmacistCitizenPrescriptionGet, prescriptionsDto *[]dto.PharmacistCitizenPrescription) error {
+func (p pharmacistService) GetCitizensActivePrescriptions(citizenUcn *dto.QueryPharmacistCitizenPrescriptionGet, prescriptionsDto *[]dto.ResponsePharmacistCitizenPrescription) error {
 	prescriptions := new([]models.Prescription)
 
 	if err := p.repo.FindActivePrescriptionsByCitizenUcn(citizenUcn.CitizenUCN, prescriptions); err != nil {
 		return err
 	}
 
-	*prescriptionsDto = make([]dto.PharmacistCitizenPrescription, len(*prescriptions))
+	*prescriptionsDto = make([]dto.ResponsePharmacistCitizenPrescription, len(*prescriptions))
 
 	for i, prescription := range *prescriptions {
-		(*prescriptionsDto)[i] = dto.PharmacistCitizenPrescription{
+		(*prescriptionsDto)[i] = dto.ResponsePharmacistCitizenPrescription{
+			ID:           prescription.ID,
 			Name:         prescription.Name,
 			CreationDate: prescription.CreationDate,
 			StartDate:    prescription.StartDate,
 			EndDate:      prescription.EndDate,
+			Medicaments: make([]struct {
+				Id           uuid.UUID `json:"id"`
+				OfficialName string    `json:"officialName"`
+				Quantity     uint      `json:"quantity"`
+				Fulfilled    bool      `json:"fulfilled"`
+			}, len(prescription.Medicaments)),
 		}
 
 		for k, medicament := range prescription.Medicaments {
 			(*prescriptionsDto)[i].Medicaments[k] = struct {
-				MedicamentName string `json:"medicament_name"`
-				Quantity       uint   `json:"quantity"`
-				Fulfilled      bool   `json:"fulfilled"`
+				Id           uuid.UUID `json:"id"`
+				OfficialName string    `json:"officialName"`
+				Quantity     uint      `json:"quantity"`
+				Fulfilled    bool      `json:"fulfilled"`
 			}{
-				MedicamentName: medicament.Medicament.OfficialName,
-				Quantity:       medicament.Quantity,
-				Fulfilled:      medicament.Fulfilled,
+				Id:           medicament.MedicamentID,
+				OfficialName: medicament.Medicament.OfficialName,
+				Quantity:     medicament.Quantity,
+				Fulfilled:    medicament.Fulfilled,
 			}
 		}
-
-		return nil
 	}
+
+	return nil
 }
 
-func (p pharmacistService) FulfillWholePrescription(data *dto.PharmacistCitizenFulfillWholePrescription) error {
-	return p.repo.FulfillWholePrescription(data.BranchId, data.PrescriptionId)
+func (p pharmacistService) FulfillWholePrescription(pharmacistId uuid.UUID, data *dto.RequestPharmacistCitizenFulfillWholePrescription) error {
+	for _, prescription := range data.Prescriptions {
+		err := p.repo.FulfillWholePrescription(pharmacistId, prescription.Id)
+		if err != nil {
+			return err
+		}
+
+	}
+	return nil
 }
 
-func (p pharmacistService) FulfillMedicamentFromPrescription(data *dto.PharmacistCitizenFulfillMedicamentFromPrescription) error {
-	return p.repo.FulfillMedicamentFromPrescription(data.PrescriptionId, data.MedicamentId)
+func (p pharmacistService) FulfillMedicamentFromPrescription(data *dto.RequestPharmacistCitizenFulfillMedicamentFromPrescription) error {
+	for _, prescription := range data.Prescriptions {
+		for _, medicament := range prescription.Medicaments {
+			err := p.repo.FulfillMedicamentFromPrescription(medicament.Id)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }
 
-func (p pharmacistService) AddMedicamentToBranchStorage(data *dto.PharmacistBranchAddMedicament) error {
+func (p pharmacistService) AddMedicamentToBranchStorage(pharmacistId uuid.UUID, data *dto.RequestPharmacistBranchAddMedicament) error {
 	for _, medicament := range data.Medicaments {
-		err := p.repo.AddMedicamentToBranchStorage(data.BranchId, medicament.BranchId, medicament.Quantity)
+		err := p.repo.AddMedicamentToBranchStorageViaPharmacistId(pharmacistId, medicament.MedicamentId, medicament.Quantity)
 		if err != nil {
 			return err
 		}
 	}
+	return nil
+}
+func (p pharmacistService) GetMedicamentByCommonName(commonName *dto.QueryDoctorGetMedicamentByCommonName, medicamentsDto *[]dto.ResponseDoctorGetMedicamentPrescription) error {
+	medicaments := new([]models.Medicament)
+	err := p.repo.FindMedicamentByCommonName(commonName.CommonName, medicaments)
+	if err != nil {
+		return err
+	}
+
+	*medicamentsDto = make([]dto.ResponseDoctorGetMedicamentPrescription, len(*medicaments))
+
+	for i, medicament := range *medicaments {
+		(*medicamentsDto)[i] = dto.ResponseDoctorGetMedicamentPrescription{
+			Id:   medicament.ID,
+			Name: medicament.OfficialName,
+		}
+	}
+
 	return nil
 }

@@ -1,28 +1,9 @@
 package models
 
 import (
-	"errors"
 	"github.com/google/uuid"
+	"medico/common"
 )
-
-type ModeratorType string
-
-const (
-	DoctorMod     ModeratorType = "doctorMod"
-	CitizenMod                  = "citizenMod"
-	PharmacyMod                 = "pharmacyMod"
-	MedicamentMod               = "medicamentMod"
-)
-
-func ModeratorTypeFromText(text string) (ModeratorType, error) {
-	modType := ModeratorType(text)
-
-	if modType != DoctorMod && modType != CitizenMod && modType != MedicamentMod && modType != PharmacyMod {
-		return "", errors.New("not logged in")
-	}
-
-	return modType, nil
-}
 
 type ModeratorAuth struct {
 	ID        uuid.UUID `gorm:"primary_key;unique;type:uuid;not null"`
@@ -37,5 +18,5 @@ type Moderator struct {
 	SecondName string
 	LastName   string
 	Email      string
-	Type       ModeratorType `gorm:"type:enum('doctorMod','citizenMod','pharmacyMod','medicamentMod');not null"`
+	Type       common.ModeratorType `gorm:"type:enum('doctor','citizen','pharmacy','medicament');not null"`
 }

@@ -16,6 +16,8 @@ type DoctorController interface {
 	VerifySession(ctx *fiber.Ctx) error
 
 	GetCitizenInfo(ctx *fiber.Ctx) error
+	GetMedicamentByCommonName(ctx *fiber.Ctx) error
+	GetListOfCitizensViaCommonUCN(ctx *fiber.Ctx) error
 	GetCitizenPrescriptions(ctx *fiber.Ctx) error
 	CreateCitizenPrescription(ctx *fiber.Ctx) error
 }
@@ -30,8 +32,8 @@ func NewDoctorController() DoctorController {
 	}
 }
 
-func (d doctorController) Login(ctx *fiber.Ctx) error {
-	doctorLogin := new(dto.DoctorLogin)
+func (d *doctorController) Login(ctx *fiber.Ctx) error {
+	doctorLogin := new(dto.RequestDoctorLogin)
 
 	if err := ctx.BodyParser(&doctorLogin); err != nil {
 		return err
@@ -57,7 +59,7 @@ func (d doctorController) Login(ctx *fiber.Ctx) error {
 	return nil
 }
 
-func (d doctorController) Logout(ctx *fiber.Ctx) error {
+func (d *doctorController) Logout(ctx *fiber.Ctx) error {
 	sessionId, err := uuid.Parse(ctx.Cookies("medico_session", uuid.Nil.String()))
 	if err != nil {
 		return err
@@ -79,7 +81,7 @@ func (d doctorController) Logout(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(nil)
 }
 
-func (d doctorController) VerifySession(ctx *fiber.Ctx) error {
+func (d *doctorController) VerifySession(ctx *fiber.Ctx) error {
 
 	if ctx.Path() == "/api/doctor/login" {
 		return ctx.Next()
@@ -104,14 +106,14 @@ func (d doctorController) VerifySession(ctx *fiber.Ctx) error {
 	return ctx.Next()
 }
 
-func (d doctorController) GetCitizenInfo(ctx *fiber.Ctx) error {
-	citizenUcnDto := new(dto.DoctorGetCitizenInfo)
+func (d *doctorController) GetCitizenInfo(ctx *fiber.Ctx) error {
+	citizenUcnDto := new(dto.QueryDoctorGetCitizenInfo)
 
-	if err := ctx.BodyParser(&citizenUcnDto); err != nil {
+	if err := ctx.QueryParser(citizenUcnDto); err != nil {
 		return err
 	}
 
-	citizenInfoDto := new(dto.DoctorCitizenInfo)
+	citizenInfoDto := new(dto.ResponseDoctorCitizenInfo)
 
 	if err := d.service.GetCitizenInfo(ctx.Locals("doctorId").(uuid.UUID), citizenUcnDto.CitizenUcn, citizenInfoDto); err != nil {
 		return err
@@ -120,14 +122,30 @@ func (d doctorController) GetCitizenInfo(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(citizenInfoDto)
 }
 
-func (d doctorController) GetCitizenPrescriptions(ctx *fiber.Ctx) error {
-	citizenIdDto := new(dto.DoctorGetCitizenPrescription)
-
-	if err := ctx.BodyParser(&citizenIdDto); err != nil {
+func (d *doctorController) GetListOfCitizensViaCommonUCN(ctx *fiber.Ctx) error {
+	citizenUcnDto := new(dto.QueryDoctorGetCitizenInfo)
+	if err := ctx.QueryParser(citizenUcnDto); err != nil {
 		return err
 	}
 
-	citizenPrescriptionDto := new([]dto.DoctorGetCitizenPrescriptionResponse)
+	citizensDto := new([]dto.ResponseListOfCitizensViaCommonUCN)
+
+	err := d.service.GetCitizensViaCommonUCN(citizenUcnDto.CitizenUcn, citizensDto)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(200).JSON(citizensDto)
+}
+
+func (d *doctorController) GetCitizenPrescriptions(ctx *fiber.Ctx) error {
+	citizenIdDto := new(dto.QueryDoctorGetCitizenPrescription)
+
+	if err := ctx.QueryParser(citizenIdDto); err != nil {
+		return err
+	}
+
+	citizenPrescriptionDto := new([]dto.ResponseDoctorGetCitizenPrescription)
 
 	if err := d.service.GetCitizensPrescriptions(ctx.Locals("doctorId").(uuid.UUID), citizenIdDto.CitizenId, citizenPrescriptionDto); err != nil {
 		return err
@@ -136,16 +154,33 @@ func (d doctorController) GetCitizenPrescriptions(ctx *fiber.Ctx) error {
 	return ctx.Status(200).JSON(citizenPrescriptionDto)
 }
 
-func (d doctorController) CreateCitizenPrescription(ctx *fiber.Ctx) error {
-	citizenPrescriptionDto := new(dto.DoctorCreatePrescription)
+func (d *doctorController) CreateCitizenPrescription(ctx *fiber.Ctx) error {
+	citizenPrescriptionDto := new(dto.RequestDoctorCreatePrescription)
 
 	if err := ctx.BodyParser(&citizenPrescriptionDto); err != nil {
 		return err
 	}
 
-	if err := d.service.CreatePrescription(ctx.Locals("doctorId").(uuid.UUID), citizenPrescriptionDto.CitizenId, citizenPrescriptionDto); err != nil {
+	if err := d.service.CreatePrescription(ctx.Locals("doctorId").(uuid.UUID), citizenPrescriptionDto); err != nil {
 		return err
 	}
 
 	return ctx.Status(200).JSON(nil)
+}
+
+func (d *doctorController) GetMedicamentByCommonName(ctx *fiber.Ctx) error {
+	commonName := new(dto.QueryDoctorGetMedicamentByCommonName)
+
+	if err := ctx.QueryParser(commonName); err != nil {
+		return err
+	}
+
+	medicamentsDto := new([]dto.ResponseDoctorGetMedicamentPrescription)
+
+	err := d.service.GetMedicamentByCommonName(commonName, medicamentsDto)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(200).JSON(medicamentsDto)
 }

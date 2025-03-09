@@ -1,8 +1,7 @@
 host: localhost
 port: 6379
 username: default
-reset: true
+reset: false
 database: 4
-refresh_database: 3
 cookie_name: medico_session
 expiration: 2h

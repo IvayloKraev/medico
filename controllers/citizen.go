@@ -15,6 +15,7 @@ type CitizenController interface {
 	Logout(ctx *fiber.Ctx) error
 	VerifySession(ctx *fiber.Ctx) error
 	GetMedicalInfo(ctx *fiber.Ctx) error
+	GetPersonalDoctor(ctx *fiber.Ctx) error
 	Prescription(ctx *fiber.Ctx) error
 	AvailablePharmacies(ctx *fiber.Ctx) error
 }
@@ -29,19 +30,15 @@ func NewCitizenController() CitizenController {
 }
 
 func (c *citizenController) Login(ctx *fiber.Ctx) error {
-	loginData := new(dto.CitizenLogin)
+	loginData := new(dto.RequestCitizenLogin)
 
 	if err := ctx.BodyParser(loginData); err != nil {
 		return err
 	}
 
-	if err := loginData.Validate(); err != nil {
-		return err
-	}
-
 	citizenAuth := models.CitizenAuth{}
 
-	if err := c.service.AuthenticateByEmailAndPassword(loginData.Email.ToString(), loginData.Password.ToString(), &citizenAuth); err != nil {
+	if err := c.service.AuthenticateByEmailAndPassword(loginData.Email, loginData.Password, &citizenAuth); err != nil {
 		return err
 	}
 
@@ -107,14 +104,58 @@ func (c *citizenController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (c *citizenController) GetMedicalInfo(ctx *fiber.Ctx) error {
-	//TODO implement me
-	panic("implement me")
+	citizenId := ctx.Locals("citizenId").(uuid.UUID)
+
+	medicalInfoDto := dto.ResponseCitizenMedicalInfo{}
+
+	err := c.service.GetMedicalInfo(citizenId, &medicalInfoDto)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(medicalInfoDto)
+}
+
+func (c *citizenController) GetPersonalDoctor(ctx *fiber.Ctx) error {
+	citizenId := ctx.Locals("citizenId").(uuid.UUID)
+
+	personalDoctorDto := dto.ResponseCitizenPersonalDoctor{}
+
+	err := c.service.GetPersonalDoctor(citizenId, &personalDoctorDto)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(personalDoctorDto)
 }
 
 func (c *citizenController) Prescription(ctx *fiber.Ctx) error {
-	return errors.New("not implemented")
+	citizenId := ctx.Locals("citizenId").(uuid.UUID)
+
+	prescriptionDto := new([]dto.ResponseCitizenPrescription)
+
+	err := c.service.ListPrescriptions(citizenId, prescriptionDto)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(prescriptionDto)
 }
 
 func (c *citizenController) AvailablePharmacies(ctx *fiber.Ctx) error {
-	return errors.New("not implemented")
+	prescriptionId := new(dto.QueryCitizenAvailablePharmacyGet)
+
+	err := ctx.QueryParser(prescriptionId)
+	if err != nil {
+		return err
+	}
+
+	pharmaciesDto := new([]dto.ResponseCitizenAvailablePharmacy)
+
+	err = c.service.FindAllAvailablePharmacies(prescriptionId, pharmaciesDto)
+	if err != nil {
+		return err
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(pharmaciesDto)
 }

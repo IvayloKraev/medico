@@ -5,88 +5,139 @@ import (
 	"github.com/google/uuid"
 )
 
-type ModeratorLogin struct {
-	Email    Email    `json:"email"`
-	Password Password `json:"password"`
+type RequestModeratorLogin struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
-func (m *ModeratorLogin) Validate() error {
-	return errors.Join(m.Email.Validate(), m.Password.Validate())
+func (m *RequestModeratorLogin) Validate() error {
+	return errors.Join(
+		validateEmail(m.Email),
+		validateTotalNumberOfCharacters(m.Password))
 }
 
-type ModeratorCreateDoctor struct {
-	FirstName  string `json:"first_name"`
-	SecondName string `json:"second_name"`
-	LastName   string `json:"last_name"`
+type RequestModeratorCreateDoctor struct {
+	FirstName  string `json:"firstName"`
+	SecondName string `json:"secondName"`
+	LastName   string `json:"lastName"`
 	UIN        string `json:"uin"`
 	Email      string `json:"email"`
 	Password   string `json:"password"`
 }
 
-type ModeratorDeleteDoctor struct {
-	DoctorId uuid.UUID `json:"doctor_id"`
+func (m *RequestModeratorCreateDoctor) Validate() error {
+	return errors.Join(
+		validateNameLength(m.FirstName, 3, 32),
+		validateNameLength(m.SecondName, 3, 32),
+		validateNameLength(m.LastName, 3, 32),
+		validateEmail(m.Email),
+		validateNumberOfLowerCase(m.Password),
+		validateNumberOfUpperCase(m.Password),
+		validateNumberOfDigits(m.Password),
+		validateNumberOfSpecialCharacters(m.Password),
+		validateTotalNumberOfCharacters(m.Password),
+		validateNotIncludedWhiteSpaces(m.Password),
+		validateUinLength(m.UIN))
 }
 
-type ModeratorGetDoctors struct {
+type QueryModeratorDeleteDoctor struct {
+	DoctorId uuid.UUID `json:"doctorId"`
+}
+
+type ResponseModeratorGetDoctors struct {
 	ID         uuid.UUID `json:"id"`
-	FirstName  string    `json:"first_name"`
-	SecondName string    `json:"second_name"`
-	LastName   string    `json:"last_name"`
+	FirstName  string    `json:"firstName"`
+	SecondName string    `json:"secondName"`
+	LastName   string    `json:"lastName"`
 	UIN        string    `json:"uin"`
 	Email      string    `json:"email"`
 }
 
-type ModeratorCreateMedicament struct {
-	OfficialName      string   `json:"official_name"`
-	ActiveIngredients []string `json:"active_ingredients"`
-	ATC               string   `json:"atc"`
-	//RequiredPrescription bool     `json:"required_prescriptions"`
+type RequestModeratorCreateMedicament struct {
+	OfficialName      string `json:"name"`
+	ActiveIngredients []struct {
+		Name string `json:"value"`
+	} `json:"activeIngredients"`
+	ATC string `json:"atc"`
 }
-type ModeratorDeleteMedicament struct {
-	MedicamentId uuid.UUID `json:"medicament_id"`
+
+func (m *RequestModeratorCreateMedicament) Validate() error {
+	return errors.Join(
+		validateNameLength(m.OfficialName, 3, 1000),
+		validateAtcCode(m.ATC))
 }
-type ModeratorGetMedicaments struct {
+
+type QueryModeratorDeleteMedicament struct {
+	MedicamentId uuid.UUID `json:"medicamentId"`
+}
+type ResponseModeratorGetMedicaments struct {
 	ID                uuid.UUID `json:"id"`
-	OfficialName      string    `json:"official_name"`
-	ActiveIngredients []string  `json:"active_ingredients"`
+	OfficialName      string    `json:"name"`
+	ActiveIngredients []string  `json:"activeIngredients"`
 	ATC               string    `json:"atc"`
 }
 
-//type ModeratorCreatePharmacyOwner struct {
-//}
-//type ModeratorDeletePharmacyOwner struct{}
-
-type ModeratorCreatePharmacy struct {
+type RequestModeratorCreatePharmacy struct {
 	Name          string `json:"name"`
-	OwnerName     string `json:"owner_name"`
-	OwnerEmail    string `json:"owner_email"`
-	OwnerPassword string `json:"owner_password"`
+	OwnerName     string `json:"ownerName"`
+	OwnerEmail    string `json:"ownerEmail"`
+	OwnerPassword string `json:"ownerPassword"`
 }
-type ModeratorDeletePharmacy struct {
-	PharmacyId uuid.UUID `json:"pharmacy_id"`
+
+func (m *RequestModeratorCreatePharmacy) Validate() error {
+	return errors.Join(
+		validateNameLength(m.Name, 1, 300),
+		validateNameLength(m.OwnerName, 3, 32),
+		validateEmail(m.OwnerEmail),
+		validateNumberOfLowerCase(m.OwnerPassword),
+		validateNumberOfUpperCase(m.OwnerPassword),
+		validateNumberOfDigits(m.OwnerPassword),
+		validateNumberOfSpecialCharacters(m.OwnerPassword),
+		validateTotalNumberOfCharacters(m.OwnerPassword),
+		validateNotIncludedWhiteSpaces(m.OwnerPassword))
 }
-type ModeratorGetPharmacies struct {
+
+type QueryModeratorDeletePharmacy struct {
+	PharmacyId uuid.UUID `json:"pharmacyId"`
+}
+type ResponseModeratorGetPharmacies struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
-	OwnerName string    `json:"pharmacy_owner"`
+	OwnerName string    `json:"ownerName"`
 }
 
-type ModeratorCreateCitizen struct {
-	FirstName        string    `json:"first_name"`
-	SecondName       string    `json:"second_name"`
-	LastName         string    `json:"last_name"`
+type RequestModeratorCreateCitizen struct {
+	FirstName        string    `json:"firstName"`
+	SecondName       string    `json:"secondName"`
+	LastName         string    `json:"lastName"`
 	UCN              string    `json:"ucn"`
 	Email            string    `json:"email"`
 	Password         string    `json:"password"`
 	PersonalDoctorId uuid.UUID `json:"personal_doctor_id"`
 }
-type ModeratorDeleteCitizen struct {
-	CitizenId uuid.UUID `json:"citizen_id"`
+
+func (m *RequestModeratorCreateCitizen) Validate() error {
+	return errors.Join(
+		validateNameLength(m.FirstName, 3, 32),
+		validateNameLength(m.SecondName, 3, 32),
+		validateNameLength(m.LastName, 3, 32),
+		validateEmail(m.Email),
+		validateNumberOfLowerCase(m.Password),
+		validateNumberOfUpperCase(m.Password),
+		validateNumberOfDigits(m.Password),
+		validateNumberOfSpecialCharacters(m.Password),
+		validateTotalNumberOfCharacters(m.Password),
+		validateNotIncludedWhiteSpaces(m.Password),
+		validateUcn(m.UCN))
 }
-type ModeratorGetCitizens struct {
+
+type QueryModeratorDeleteCitizen struct {
+	CitizenId uuid.UUID `json:"citizenId"`
+}
+type ResponseModeratorGetCitizens struct {
 	ID         uuid.UUID `json:"id"`
-	FirstName  string    `json:"first_name"`
-	SecondName string    `json:"second_name"`
-	LastName   string    `json:"last_name"`
+	FirstName  string    `json:"firstName"`
+	SecondName string    `json:"secondName"`
+	LastName   string    `json:"lastName"`
 	UCN        string    `json:"ucn"`
 }

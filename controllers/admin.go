@@ -28,19 +28,15 @@ func NewAdminController() AdminController {
 }
 
 func (c *adminController) Login(ctx *fiber.Ctx) error {
-	adminLogin := new(dto.AdminLogin)
+	adminLogin := new(dto.RequestAdminLogin)
 
-	if err := ctx.BodyParser(&adminLogin); err != nil {
-		return err
-	}
-
-	if err := adminLogin.Validate(); err != nil {
+	if err := ctx.BodyParser(adminLogin); err != nil {
 		return err
 	}
 
 	adminAuth := models.AdminAuth{}
 
-	if err := c.service.AuthenticateByEmailAndPassword(adminLogin.Email.ToString(), adminLogin.Password.ToString(), &adminAuth); err != nil {
+	if err := c.service.AuthenticateByEmailAndPassword(adminLogin.Email, adminLogin.Password, &adminAuth); err != nil {
 		return err
 	}
 
@@ -105,7 +101,7 @@ func (c *adminController) VerifySession(ctx *fiber.Ctx) error {
 }
 
 func (c *adminController) GetModerators(ctx *fiber.Ctx) error {
-	dtoModerators := new([]dto.AdminGetModerator)
+	dtoModerators := new([]dto.ResponseAdminGetModerator)
 
 	if err := c.service.GetModerators(dtoModerators); err != nil {
 		return err
@@ -115,13 +111,9 @@ func (c *adminController) GetModerators(ctx *fiber.Ctx) error {
 }
 
 func (c *adminController) AddModerator(ctx *fiber.Ctx) error {
-	newModerator := new(dto.AdminCreateModerator)
+	newModerator := new(dto.RequestAdminCreateModerator)
 
-	if err := ctx.BodyParser(&newModerator); err != nil {
-		return err
-	}
-
-	if err := newModerator.Validate(); err != nil {
+	if err := ctx.BodyParser(newModerator); err != nil {
 		return err
 	}
 
@@ -134,9 +126,9 @@ func (c *adminController) AddModerator(ctx *fiber.Ctx) error {
 }
 
 func (c *adminController) DeleteModerator(ctx *fiber.Ctx) error {
-	moderatorId := new(dto.AdminDeleteModerator)
+	moderatorId := new(dto.QueryAdminDeleteModerator)
 
-	if err := ctx.BodyParser(&moderatorId); err != nil {
+	if err := ctx.QueryParser(moderatorId); err != nil {
 		return err
 	}
 
