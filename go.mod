@@ -10,6 +10,7 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.12
+	github.com/caarlos0/env/v11 v11.3.1
 )
 
 require (
