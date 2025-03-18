@@ -7,10 +7,10 @@ import (
 	"github.com/gofiber/storage/redis/v3"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"medico/config"
 	"medico/controllers"
 	"medico/models"
 	"medico/repo"
+	"medico/utils"
 	"strings"
 )
 
@@ -75,7 +75,7 @@ func setupCORS(router fiber.Router) {
 }
 
 func setupCSRF(router fiber.Router) {
-	csrfConfig := config.LoadCSRFTokenConfig()
+	csrfConfig := utils.GetCSRFConfig()
 
 	router.Use(csrf.New(csrf.Config{
 		CookieName: csrfConfig.CookieName,
@@ -118,7 +118,7 @@ func setupAdminRoutes(router fiber.Router) {
 		if err != nil {
 			return err
 		}
-		databaseConfig := config.LoadDatabaseConfig()
+		databaseConfig := utils.GetDatabaseConfig()
 
 		db := repo.CreateNewRepository(databaseConfig)
 

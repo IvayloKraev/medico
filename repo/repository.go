@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"medico/config"
+	"medico/utils"
 )
 
 type Repository interface {
@@ -33,7 +33,7 @@ type repository struct {
 	db *gorm.DB
 }
 
-func CreateNewRepository(databaseConfig *config.DatabaseConfig) Repository {
+func CreateNewRepository(databaseConfig *utils.DatabaseConfig) Repository {
 	db, err := createConnection(databaseConfig)
 
 	if err != nil {
@@ -43,7 +43,7 @@ func CreateNewRepository(databaseConfig *config.DatabaseConfig) Repository {
 	return &repository{db: db}
 }
 
-func createConnection(databaseConfig *config.DatabaseConfig) (*gorm.DB, error) {
+func createConnection(databaseConfig *utils.DatabaseConfig) (*gorm.DB, error) {
 	fmt.Println("Connecting to database...")
 	dsn := fmt.Sprintf("%s:%s@(%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		databaseConfig.Username, databaseConfig.Password,

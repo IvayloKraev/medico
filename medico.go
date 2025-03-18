@@ -2,21 +2,18 @@ package main
 
 import (
 	"github.com/gofiber/fiber/v2"
-	"medico/config"
-	"medico/repo"
 	"medico/routes"
+	"medico/utils"
 )
 
-func main() {
-	migrationConfig := config.LoadMigrationConfig()
+func init() {
+	utils.LoadDatabaseConfig()
+	utils.LoadCSRFConfig()
+	utils.LoadCSRFConfig()
+	utils.LoadHashingCost()
+}
 
-	if migrationConfig.Migration {
-		migrator := repo.NewMigratorRepo()
-		err := migrator.MigrateAll()
-		if err != nil {
-			panic(err)
-		}
-	}
+func main() {
 
 	medicoFiber := fiber.New()
 

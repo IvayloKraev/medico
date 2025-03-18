@@ -4,8 +4,8 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"medico/config"
 	"medico/models"
+	"medico/utils"
 )
 
 type PharmacyOwnerRepo interface {
@@ -28,7 +28,7 @@ type pharmacyOwnerRepo struct {
 }
 
 func NewPharmacyOwnerRepo() PharmacyOwnerRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return &pharmacyOwnerRepo{
 		repo: CreateNewRepository(databaseConfig),
 	}
@@ -102,7 +102,7 @@ type pharmacistRepo struct {
 }
 
 func NewPharmacistRepo() PharmacistRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return &pharmacistRepo{
 		repo: CreateNewRepository(databaseConfig),
 	}
