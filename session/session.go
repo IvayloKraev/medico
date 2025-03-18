@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/gofiber/storage/redis/v3"
 	"github.com/google/uuid"
-	"medico/config"
+	"medico/utils"
 	"time"
 )
 
@@ -25,7 +25,7 @@ type authSession struct {
 }
 
 func NewAuthSession(role string) AuthSession {
-	sessionConfig := config.LoadAuthSessionConfig()
+	sessionConfig := utils.GetAuthSessionConfig()
 
 	return &authSession{
 		sessionStore: redis.New(redis.Config{
