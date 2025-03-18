@@ -8,6 +8,7 @@ import (
 	"medico/models"
 	"medico/repo"
 	"medico/session"
+	"medico/utils"
 	"time"
 )
 
@@ -58,7 +59,7 @@ func (s *adminService) DeleteAuthenticationSession(sessionId uuid.UUID) error {
 }
 
 func (s *adminService) CreateModerator(createModerator *dto.RequestAdminCreateModerator) error {
-	password, err := bcrypt.GenerateFromPassword([]byte(createModerator.Password), bcrypt.DefaultCost)
+	password, err := bcrypt.GenerateFromPassword([]byte(createModerator.Password), utils.GetHashingConfig().Cost)
 	if err != nil {
 		return err
 	}

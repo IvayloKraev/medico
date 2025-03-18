@@ -8,6 +8,7 @@ import (
 	"medico/models"
 	"medico/repo"
 	"medico/session"
+	"medico/utils"
 	"strings"
 	"time"
 )
@@ -92,7 +93,7 @@ func (m *doctorModeratorService) GetAuthenticationSession(sessionID uuid.UUID) (
 }
 
 func (m *doctorModeratorService) CreateDoctor(createDoctor *dto.RequestModeratorCreateDoctor) error {
-	password, err := bcrypt.GenerateFromPassword([]byte(createDoctor.Password), bcrypt.DefaultCost)
+	password, err := bcrypt.GenerateFromPassword([]byte(createDoctor.Password), utils.GetHashingConfig().Cost)
 	if err != nil {
 		return err
 	}
@@ -178,7 +179,7 @@ func (m *pharmaModeratorService) GetAuthenticationSession(sessionID uuid.UUID) (
 }
 
 func (m *pharmaModeratorService) CreatePharmacyAndOwner(createPharmacy *dto.RequestModeratorCreatePharmacy) error {
-	password, err := bcrypt.GenerateFromPassword([]byte(createPharmacy.OwnerPassword), bcrypt.DefaultCost)
+	password, err := bcrypt.GenerateFromPassword([]byte(createPharmacy.OwnerPassword), utils.GetHashingConfig().Cost)
 	if err != nil {
 		return err
 	}
@@ -338,7 +339,7 @@ func (m *citizenModeratorService) GetAuthenticationSession(sessionID uuid.UUID) 
 }
 
 func (m *citizenModeratorService) CreateCitizen(createCitizen *dto.RequestModeratorCreateCitizen) error {
-	password, err := bcrypt.GenerateFromPassword([]byte(createCitizen.Password), bcrypt.DefaultCost)
+	password, err := bcrypt.GenerateFromPassword([]byte(createCitizen.Password), utils.GetHashingConfig().Cost)
 	if err != nil {
 		return err
 	}

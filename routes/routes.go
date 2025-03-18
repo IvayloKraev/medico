@@ -122,7 +122,7 @@ func setupAdminRoutes(router fiber.Router) {
 
 		db := repo.CreateNewRepository(databaseConfig)
 
-		password, err := bcrypt.GenerateFromPassword([]byte(m.Password), bcrypt.DefaultCost)
+		password, err := bcrypt.GenerateFromPassword([]byte(m.Password), utils.GetHashingConfig().Cost)
 		if err != nil {
 			return err
 		}

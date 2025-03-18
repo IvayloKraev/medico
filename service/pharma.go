@@ -7,6 +7,7 @@ import (
 	"medico/models"
 	"medico/repo"
 	"medico/session"
+	"medico/utils"
 	"time"
 )
 
@@ -142,7 +143,7 @@ func (p *pharmacyOwnerService) NewPharmacyBranch(pharmacyOwnerId uuid.UUID, bran
 }
 
 func (p *pharmacyOwnerService) NewPharmacist(pharmacyOwnerId uuid.UUID, pharmacist *dto.RequestPharmacyOwnerNewPharmacist) error {
-	password, err := bcrypt.GenerateFromPassword([]byte(pharmacist.Password), bcrypt.DefaultCost)
+	password, err := bcrypt.GenerateFromPassword([]byte(pharmacist.Password), utils.GetHashingConfig().Cost)
 	if err != nil {
 		return err
 	}
