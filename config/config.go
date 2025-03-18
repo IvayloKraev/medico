@@ -19,17 +19,6 @@ const (
 	authSessionConfigPath = "./config/authSession.config.yml"
 )
 
-type CSRFConfig struct {
-	Host           string        `yaml:"host"`
-	Port           int           `yaml:"port"`
-	Reset          bool          `yaml:"reset"`
-	Username       string        `yaml:"username"`
-	Database       int           `yaml:"database"`
-	CookieName     string        `yaml:"cookie_name"`
-	SingleUseToken bool          `yaml:"single_use_token"`
-	Expiration     time.Duration `yaml:"expiration"`
-}
-
 type AuthSessionConfig struct {
 	Host       string        `yaml:"host"`
 	Port       int           `yaml:"port"`
@@ -50,12 +39,6 @@ func loadConfig(configPath string, out interface{}) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func LoadCSRFTokenConfig() *CSRFConfig {
-	csrfConfig := &CSRFConfig{}
-	loadConfig(csrfStorageConfigPath, csrfConfig)
-	return csrfConfig
 }
 
 func LoadAuthSessionConfig() *AuthSessionConfig {
