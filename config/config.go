@@ -19,10 +19,6 @@ const (
 	authSessionConfigPath = "./config/authSession.config.yml"
 )
 
-type MigratorConfig struct {
-	Migration bool `yaml:"migration"`
-}
-
 type CSRFConfig struct {
 	Host           string        `yaml:"host"`
 	Port           int           `yaml:"port"`
@@ -54,12 +50,6 @@ func loadConfig(configPath string, out interface{}) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func LoadMigrationConfig() *MigratorConfig {
-	migrationConfig := &MigratorConfig{}
-	loadConfig(databaseConfigPath, migrationConfig)
-	return migrationConfig
 }
 
 func LoadCSRFTokenConfig() *CSRFConfig {
