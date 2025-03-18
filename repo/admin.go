@@ -2,8 +2,8 @@ package repo
 
 import (
 	"github.com/google/uuid"
-	"medico/config"
 	"medico/models"
+	"medico/utils"
 )
 
 type AdminRepo interface {
@@ -18,7 +18,7 @@ type adminRepo struct {
 }
 
 func NewAdminRepo() AdminRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return &adminRepo{repo: CreateNewRepository(databaseConfig)}
 }
 

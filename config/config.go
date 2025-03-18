@@ -19,15 +19,6 @@ const (
 	authSessionConfigPath = "./config/authSession.config.yml"
 )
 
-type DatabaseConfig struct {
-	DBMS     DBMS   `yaml:"dbms"`
-	Host     string `yaml:"host"`
-	Port     uint16 `yaml:"port"`
-	DBName   string `yaml:"dbname"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-}
-
 type MigratorConfig struct {
 	Migration bool `yaml:"migration"`
 }
@@ -63,12 +54,6 @@ func loadConfig(configPath string, out interface{}) {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func LoadDatabaseConfig() *DatabaseConfig {
-	databaseConfig := &DatabaseConfig{}
-	loadConfig(databaseConfigPath, databaseConfig)
-	return databaseConfig
 }
 
 func LoadMigrationConfig() *MigratorConfig {

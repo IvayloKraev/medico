@@ -5,7 +5,15 @@ import (
 	"medico/config"
 	"medico/repo"
 	"medico/routes"
+	"medico/utils"
 )
+
+func init() {
+	utils.LoadDatabaseConfig()
+	utils.LoadCSRFConfig()
+	utils.LoadCSRFConfig()
+	utils.LoadHashingCost()
+}
 
 func main() {
 	migrationConfig := config.LoadMigrationConfig()

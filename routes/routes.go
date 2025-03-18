@@ -11,6 +11,7 @@ import (
 	"medico/controllers"
 	"medico/models"
 	"medico/repo"
+	"medico/utils"
 	"strings"
 )
 
@@ -118,7 +119,7 @@ func setupAdminRoutes(router fiber.Router) {
 		if err != nil {
 			return err
 		}
-		databaseConfig := config.LoadDatabaseConfig()
+		databaseConfig := utils.GetDatabaseConfig()
 
 		db := repo.CreateNewRepository(databaseConfig)
 

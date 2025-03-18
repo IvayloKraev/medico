@@ -2,8 +2,8 @@ package repo
 
 import (
 	"github.com/google/uuid"
-	"medico/config"
 	"medico/models"
+	"medico/utils"
 )
 
 type DoctorRepo interface {
@@ -23,7 +23,7 @@ type doctorRepo struct {
 }
 
 func NewDoctorRepo() DoctorRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return &doctorRepo{
 		repo: CreateNewRepository(databaseConfig),
 	}

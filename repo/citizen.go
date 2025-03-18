@@ -2,8 +2,8 @@ package repo
 
 import (
 	"github.com/google/uuid"
-	"medico/config"
 	"medico/models"
+	"medico/utils"
 )
 
 type CitizenRepo interface {
@@ -19,7 +19,7 @@ type citizenRepo struct {
 }
 
 func NewCitizenRepo() CitizenRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return &citizenRepo{repo: CreateNewRepository(databaseConfig)}
 }
 

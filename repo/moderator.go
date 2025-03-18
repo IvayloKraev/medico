@@ -4,8 +4,8 @@ import (
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"medico/common"
-	"medico/config"
 	"medico/models"
+	"medico/utils"
 )
 
 type ModeratorRepo interface {
@@ -17,7 +17,7 @@ type moderatorRepo struct {
 }
 
 func NewModeratorRepo() ModeratorRepo {
-	connection, err := createConnection(config.LoadDatabaseConfig())
+	connection, err := createConnection(utils.GetDatabaseConfig())
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +43,7 @@ type doctorModeratorRepo struct {
 }
 
 func NewDoctorModeratorRepo() DoctorModeratorRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return &doctorModeratorRepo{
 		repo: CreateNewRepository(databaseConfig),
 	}
@@ -80,7 +80,7 @@ type pharmaModeratorRepo struct {
 }
 
 func NewPharmaModeratorRepo() PharmaModeratorRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return &pharmaModeratorRepo{
 		repo: CreateNewRepository(databaseConfig),
 	}
@@ -121,7 +121,7 @@ type medicamentModeratorRepo struct {
 }
 
 func NewMedicamentModeratorRepo() MedicamentModeratorRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return &medicamentModeratorRepo{
 		repo: CreateNewRepository(databaseConfig),
 	}
@@ -156,7 +156,7 @@ type citizenModeratorRepo struct {
 }
 
 func NewCitizenModeratorRepo() CitizenModeratorRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return &citizenModeratorRepo{
 		repo: CreateNewRepository(databaseConfig),
 	}

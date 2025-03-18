@@ -1,8 +1,8 @@
 package repo
 
 import (
-	"medico/config"
 	"medico/models"
+	"medico/utils"
 )
 
 type MigratorRepo interface {
@@ -14,7 +14,7 @@ type migratorRepo struct {
 }
 
 func NewMigratorRepo() MigratorRepo {
-	databaseConfig := config.LoadDatabaseConfig()
+	databaseConfig := utils.GetDatabaseConfig()
 	return migratorRepo{repo: CreateNewRepository(databaseConfig)}
 }
 
