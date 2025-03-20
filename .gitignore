@@ -141,3 +141,6 @@ fabric.properties
 
 ### Enviroment variables ###
 .env
+
+### SQLC ###
+repo/db
