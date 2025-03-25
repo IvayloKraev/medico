@@ -3,6 +3,10 @@ package dto
 import "errors"
 
 const (
+	WrongData = "wrong data"
+)
+
+const (
 	EmailIncorrect = "the provided email is not correct"
 )
 
@@ -41,6 +45,10 @@ const (
 
 const (
 	CoordinatesInvalid = "coordinates are invalid"
+)
+
+var (
+	ErrWrongData = errors.New(WrongData)
 )
 
 var (
